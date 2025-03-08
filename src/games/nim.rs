@@ -1,0 +1,62 @@
+#[derive(Debug)]
+pub struct NimMove(pub usize /* pile */, pub u32 /* amount */);
+
+#[derive(Clone)]
+pub struct NimState {
+    pub piles: Vec<u32>,
+    pub turn: bool, // true if it's player's turn, false is computer's turn
+}
+
+impl NimState {
+    pub fn new(piles: Vec<u32>, turn: bool) -> Self {
+        Self { piles, turn }
+    }
+
+    pub fn is_game_over(&self) -> bool {
+        self.piles.iter().all(|&pile| pile == 0)
+    }
+
+    // note: refactor to return a Result
+    pub fn apply_move(&mut self, action: NimMove) -> bool {
+        let NimMove(pile, amount) = action;
+        if pile >= self.piles.len() {
+            return false;
+        }
+        let pile_amt = self.piles[pile];
+        if pile_amt < amount {
+            return false;
+        }
+        if pile_amt == 0 {
+            return false;
+        }
+        self.piles[pile] -= amount;
+        self.turn = !self.turn;
+        true
+    }
+
+    pub fn grundy_value(&self) -> u32 {
+        self.piles.iter().fold(0, |acc, pile| acc ^ pile)
+    }
+
+    pub fn computer_move(&self) -> NimMove {
+        let grundy = self.grundy_value();
+        if grundy == 0 {
+            // every move loses, pick an arbitrary move
+            let pile = (0..self.piles.len())
+                .find(|&pile| self.piles[pile] > 0)
+                .unwrap();
+            let amount = 1;
+            return NimMove(pile, amount);
+        }
+        for (idx, &pile_amt) in self.piles.iter().enumerate() {
+            if pile_amt == 0 {
+                continue;
+            }
+            let new_pile_amt = pile_amt ^ grundy;
+            if new_pile_amt < pile_amt {
+                return NimMove(idx, pile_amt - new_pile_amt);
+            }
+        }
+        unreachable!();
+    }
+}
