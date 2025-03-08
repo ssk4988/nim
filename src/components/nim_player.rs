@@ -31,41 +31,53 @@ pub fn NimPlayer() -> impl IntoView {
                         />
                     }
                 }).collect_view();
-                view! { <div>{stones}</div> }
+                view! { <div class=("pile-column", move || pile > 0)>{stones}</div> }
             })
             .collect_view()
     };
 
     let status_message = move || {
-        if board.get().is_game_over() {
+        if !picked_side.get() {
+            "Would you like to move first or second?"
+        }
+        else if board.get().is_game_over() {
             if board.get().turn {
                 "Computer wins!"
             } else {
                 "Player wins!"
             }
-            .to_owned()
         } else {
-            "Turn: ".to_owned()
-                + if board.get().turn {
-                    "Player"
-                } else {
-                    "Computer"
-                }
+            if board.get().turn {
+                "It's your turn!"
+            } else {
+                "Computer is thinking..."
+            }
         }
     };
 
     let turn_prompt = move || view! {
-        <p>"Would you like to move first or second?"</p>
-        <button on:click=move |_| {
-            set_picked_side.set(true);
-        }>"First"</button>
-        <button on:click=move |_| {
-            set_picked_side.set(true);
-            set_board
-                .update(|board| {
-                    board.turn = false;
-                });
-        }>"Second"</button>
+        <div style="display: flex; justify-content: center; margin-top: 1rem;">
+            <button
+                on:click=move |_| {
+                    set_picked_side.set(true);
+                }
+                class="turn-button"
+            >
+                "First"
+            </button>
+            <button
+                on:click=move |_| {
+                    set_picked_side.set(true);
+                    set_board
+                        .update(|board| {
+                            board.turn = false;
+                        });
+                }
+                class="turn-button"
+            >
+                "Second"
+            </button>
+        </div>
     };
 
     // Effect to make computer move
@@ -92,9 +104,12 @@ pub fn NimPlayer() -> impl IntoView {
     });
     
     view! {
-        <div style="background-color: var(--background-color)">
-            {status_message} {
-                move || { if picked_side.get() { None } else { Some(turn_prompt) } }}
+        <div class="container">
+            <h1>Nim</h1>
+            <div class="status-message">
+                {status_message}
+                {move || { if picked_side.get() { None } else { Some(turn_prompt) } }}
+            </div>
             <div class="nim-container" class:opacity-0=move || !picked_side.get()>
                 {pile_stones}
             </div>
