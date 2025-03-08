@@ -5,6 +5,7 @@ html, body {
     padding: 0;
     display: flex;
     justify-content: center; /* Center horizontally */
+    background: linear-gradient(235deg, #a4f3ff, #a3affa); /* Add a gradient background */
 }
 
 :root {
@@ -12,8 +13,6 @@ html, body {
     --padding: 10px;
     --button-color: rgb(81, 81, 250);
     --button-margin: 10px;
-    background-color: var(--background-color);
-    
 }
 
 .container {
@@ -60,22 +59,31 @@ html, body {
     background-color: rgba(0, 0, 0, 0.2);
 }
 
-.stone-button {
-    background-color: #8a827c; /* Brown color to resemble a rock */
-    border: 0.05rem solid #4f4e4d; /* Darker brown border */
-    border-radius: 50%; /* Make the button round */
-    width: 2rem; /* Width of the button */
-    height: 2rem; /* Height of the button */
-    margin: 0.1rem;
-    color: white; /* Text color */
+.stone-image {
+    width: 2rem;
+    height: 2rem;
+    cursor: pointer;
+    transition: transform 0.2s;
     box-shadow: 0.05rem 0.05rem 5px rgba(0, 0, 0, 0.5); /* Add a shadow for a 3D effect */
+}
+
+.stone-button {
+    width: 2rem; /* Set the width using rem units */
+    height: 2rem; /* Set the height using rem units */
+    background-image: url('/images/stone.png'); /* Set the background image */
+    background-size: cover; /* Ensure the image covers the entire button */
+    background-color: rgba(0, 0, 0, 0); /* Set the background color to transparent */
+    background-position: center; /* Center the background image */
+    border: none; /* Remove the default border */
+    border-radius: 50%; /* Make the button round */
+    margin: 0.1rem;
     cursor: pointer; /* Change cursor to pointer on hover */
     transition: transform 0.2s; /* Smooth transition for scaling */
 }
 
 .stone-button:hover, .stone-button:hover ~ .stone-button {
     transform: scale(1.1); /* Scale up the button on hover */
-    background-color: #cc1515;
+    opacity: 0.9; /* Reduce opacity on hover */
 }
 
 .stone-button:disabled {
@@ -84,7 +92,6 @@ html, body {
 }
 
 .nim-container {
-    background-color: var(--background-color);
     padding: var(--padding);
     margin-top: 0.5rem;
     width: 30rem;
@@ -99,7 +106,7 @@ html, body {
     flex-direction: column-reverse;
     align-items: center;
     justify-content: center;
-    margin: 0 1rem;
+    margin: 0 1.5rem;
 }
 
 .status-message {
