@@ -1,5 +1,5 @@
 use leptos::{logging, prelude::*};
-use std::{vec, time::Duration};
+use std::time::Duration;
 use rand::Rng;
 use crate::{NimState, NimMove};
 
