@@ -40,6 +40,26 @@ html, body {
     background-color: #293fbc;
 }
 
+.help-button {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background-color: rgba(0, 0, 0, 0);
+    border: 0px;
+    border-radius: 50%;
+    width: 3rem;
+    height: 3rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.help-button:hover {
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
 .stone-button {
     background-color: #8a827c; /* Brown color to resemble a rock */
     border: 0.05rem solid #4f4e4d; /* Darker brown border */
