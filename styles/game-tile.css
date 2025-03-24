@@ -1,0 +1,35 @@
+.game-tile {
+    display: inline-block;
+    margin: 1rem;
+}
+
+.game-tile a {
+    display: block;
+    width: 10rem; /* Set the width of the tile */
+    height: 10rem; /* Set the height of the tile */
+    text-decoration: none;
+    color: inherit;
+}
+
+.game-tile-image {
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.5rem;
+    transition: transform 0.2s;
+}
+
+.game-tile-image:hover {
+    transform: scale(1.05);
+}
+
+.game-tile-text {
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+}
