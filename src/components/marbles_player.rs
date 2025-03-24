@@ -1,38 +1,40 @@
 use leptos::{logging, prelude::*};
 use std::time::Duration;
-use crate::{NimState, NimMove};
+use crate::{MarblesState, MarblesMove};
 
 
-pub fn NimPlayer() -> impl IntoView {
-    let (board, set_board) = signal(NimState::gen());
+pub fn MarblesPlayer() -> impl IntoView {
+    let (board, set_board) = signal(MarblesState::gen());
     let (picked_side, set_picked_side) = signal(false);
     let (sidebar_open, set_sidebar_open) = signal(false);
-    let pile_stones = move || {
-        board
-            .get()
-            .piles
-            .iter()
-            .enumerate()
-            .map(|(id, &pile)| {
-                let stones = (1..=pile).map(move |index| {
-                    let disabled = !board.get().turn || !picked_side.get();
-                    view! {
-                        <button
-                            disabled=disabled
-                            on:click=move |_| {
-                                set_board
-                                    .update(|board| {
-                                        board.apply_move(NimMove(id, pile + 1 - index));
-                                    });
-                            }
-                            class="stone-button"
-                            class=("no-hover", move || disabled)
-                        />
+    
+
+    let pile = move || {
+        let pile_amt = board.get().pile_amt;
+        let stones = (0..pile_amt).map(move |id| {
+            let disabled = !board.get().turn || !picked_side.get();
+            view! {
+                <button
+                    disabled=disabled
+                    on:click=move |_| {
+                        let id = (pile_amt - id).min(3);
+                        set_board
+                            .update(|board| {
+                                board.apply_move(MarblesMove(id));
+                            });
                     }
-                }).collect_view();
-                view! { <div class=("pile-column", move || pile > 0)>{stones}</div> }
-            })
-            .collect_view()
+                    class="stone-button"
+                    class=(
+                        "no-hover",
+                        move || {
+                            let id = pile_amt - id;
+                            disabled || id > 3
+                        },
+                    )
+                />
+            }
+        }).collect_view();
+        view! { <div class="pile">{stones}</div> }
     };
 
     let status_message = move || {
@@ -63,21 +65,7 @@ pub fn NimPlayer() -> impl IntoView {
             >
                 <h2>Rules</h2>
                 <p>
-                    "Nim is a mathematical game of strategy in which two players take turns removing stones from piles. On each turn, a player must pick a pile and remove at least one stone from it. The goal of the game is to be the player who removes the last stone."
-                </p>
-                <h2>How to Play</h2>
-                <p>
-                    "To play, select a pile and remove any number of stones from it. The player who removes the last stone wins the game."
-                </p>
-                <p>
-                    "For more information, visit "
-                    <a
-                        href="https://brilliant.org/wiki/nim/"
-                        target="_
-                        blank"
-                    >
-                        "Brilliant's Article on Nim"
-                    </a>
+                    "On each turn, a player must pick 1-3 stones and remove them. The player who removes the last stone wins the game."
                 </p>
             </dialog>
         }
@@ -131,13 +119,13 @@ pub fn NimPlayer() -> impl IntoView {
 
     // Effect to print out the board state and current grundy number
     Effect::new(move || {
-        logging::log!("Board: {:?}", board.get().piles);
+        logging::log!("Board: {:?}", board.get().pile_amt);
         logging::log!("Grundy value: {}", board.get().grundy_value());
     });
     
     view! {
         <div class="container">
-            <h1>Nim</h1>
+            <h1>Marbles</h1>
             <div class="menu">
                 <button
                     class="help-button"
@@ -148,7 +136,7 @@ pub fn NimPlayer() -> impl IntoView {
                 <button
                     class="help-button"
                     on:click=move |_| {
-                        set_board.set(NimState::gen());
+                        set_board.set(MarblesState::gen());
                         set_picked_side.set(false);
                     }
                 >
@@ -174,8 +162,8 @@ pub fn NimPlayer() -> impl IntoView {
                 {status_message}
                 {move || { if picked_side.get() { None } else { Some(turn_prompt) } }}
             </div>
-            <div class="nim-container" class:opacity-0=move || !picked_side.get()>
-                {pile_stones}
+            <div class="marbles-container" class:opacity-0=move || !picked_side.get()>
+                {pile}
             </div>
             {sidebar}
         </div>
