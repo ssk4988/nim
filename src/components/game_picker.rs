@@ -7,10 +7,10 @@ pub fn GameTile(game: String, path: String,
 ) -> impl IntoView {
     view! {
         <div class="game-tile">
-            <a href=path>
+            <a href=format!(".{}", path)>
                 <div
                     class="game-tile-image"
-                    style=format!("background-image: url('nim/images/{}');", image_url)
+                    style=format!("background-image: url('images/{}');", image_url)
                 >
                     <span class="game-tile-text">{game}</span>
                 </div>

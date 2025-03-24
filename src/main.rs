@@ -16,9 +16,9 @@ pub fn App() -> impl IntoView {
             <nav></nav>
             <main>
                 <Routes fallback=|| view! { <h1>404 Not Found</h1> }>
-                    <Route path=path!("/") view=GamePicker />
-                    <Route path=path!("/nim") view=NimPlayer />
-                    <Route path=path!("/marbles") view=MarblesPlayer />
+                    <Route path=path!("/nim") view=GamePicker />
+                    <Route path=path!("/nim/nim") view=NimPlayer />
+                    <Route path=path!("/nim/marbles") view=MarblesPlayer />
                 </Routes>
             </main>
         </Router>
