@@ -3,7 +3,15 @@ use leptos_meta::{provide_meta_context, MetaTags, Stylesheet, Title};
 use leptos_router::{
     components::{Route, Router, Routes},
     StaticSegment,
+    path
 };
+
+mod components;
+use components::{GamePicker, NimPlayer, MarblesPlayer};
+
+// reexport so that the games can be used in the components
+mod games;
+pub use games::{NimMove, NimState, MarblesMove, MarblesState};
 
 pub fn shell(options: LeptosOptions) -> impl IntoView {
     view! {
@@ -33,14 +41,20 @@ pub fn App() -> impl IntoView {
         // id=leptos means cargo-leptos will hot-reload this stylesheet
         <Stylesheet id="leptos" href="/pkg/nim.css"/>
 
+        // add material icons
+        <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
+
         // sets the document title
-        <Title text="Welcome to Leptos"/>
+        <Title text="Nim"/>
 
         // content for this welcome page
         <Router>
+            <nav></nav>
             <main>
-                <Routes fallback=|| "Page not found.".into_view()>
-                    <Route path=StaticSegment("") view=HomePage/>
+                <Routes fallback=|| view! { <h1>404 Not Found</h1> }>
+                    <Route path=path!("/") view=GamePicker />
+                    <Route path=path!("/nim") view=NimPlayer />
+                    <Route path=path!("/marbles") view=MarblesPlayer />
                 </Routes>
             </main>
         </Router>
