@@ -1,12 +1,24 @@
+use axum::{routing::get, Router};
+use oauth2::{basic::BasicClient, AuthUrl, ClientId, ClientSecret, RedirectUrl, TokenUrl};
+
+use leptos::logging::log;
+use std::sync::Arc;
+use tokio::sync::Mutex;
+mod server;
+use server::{google_auth, google_callback};
 
 #[cfg(feature = "ssr")]
 #[tokio::main]
 async fn main() {
-    use axum::Router;
+    use dotenv::from_filename;
     use leptos::logging::log;
     use leptos::prelude::*;
     use leptos_axum::{generate_route_list, LeptosRoutes};
     use nim::app::*;
+    use std::env;
+
+    // Load the .env file
+    from_filename(".env.dev").ok();
 
     let conf = get_configuration(None).unwrap();
     let addr = conf.leptos_options.site_addr;
@@ -14,11 +26,46 @@ async fn main() {
     // Generate the list of routes in your Leptos App
     let routes = generate_route_list(App);
 
+    // Create the OAuth2 client
+    let google_client_id = env::var("GOOGLE_CLIENT_ID").expect("GOOGLE_CLIENT_ID must be set");
+    let google_client_secret =
+        env::var("GOOGLE_CLIENT_SECRET").expect("GOOGLE_CLIENT_SECRET must be set");
+    let google_redirect_uri =
+        env::var("GOOGLE_REDIRECT_URI").expect("GOOGLE_REDIRECT_URI must be set");
+    let oauth_client = Arc::new(Mutex::new(
+        BasicClient::new(
+            ClientId::new(google_client_id),
+            Some(ClientSecret::new(google_client_secret)),
+            AuthUrl::new("https://accounts.google.com/o/oauth2/auth".to_string()).unwrap(),
+            Some(TokenUrl::new("https://oauth2.googleapis.com/token".to_string()).unwrap()),
+        )
+        .set_redirect_uri(
+            RedirectUrl::new(google_redirect_uri).unwrap(),
+        ),
+    ));
+
+    // Create a single HTTP client instance
+    // let http_client = Arc::new(Client::new());
+
     let app = Router::new()
         .leptos_routes(&leptos_options, routes, {
             let leptos_options = leptos_options.clone();
             move || shell(leptos_options.clone())
         })
+        .route(
+            "/auth/google",
+            get({
+                let oauth_client = oauth_client.clone();
+                move || google_auth(oauth_client)
+            }),
+        )
+        .route(
+            "/auth/google/callback",
+            get({
+                let oauth_client = oauth_client.clone();
+                move |query| google_callback(oauth_client, query)
+            }),
+        )
         .fallback(leptos_axum::file_and_error_handler(shell))
         .with_state(leptos_options);
 
