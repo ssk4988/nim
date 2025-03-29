@@ -1,4 +1,5 @@
 use std::sync::Arc;
+// use sqlx::{mssql::MssqlPoolOptions, Pool, Mssql};
 use tokio::sync::{Mutex, MutexGuard};
 
 use leptos::logging::log;
@@ -12,8 +13,11 @@ use oauth2::{EmptyExtraTokenFields, Scope, StandardTokenResponse, TokenResponse}
 
 use ::reqwest::Client;
 use axum::{extract::Query, response::Redirect};
-
 use serde::{Deserialize, Serialize};
+
+
+
+
 
 // redirect to Google OAuth login page
 pub async fn google_auth(oauth_client: Arc<Mutex<BasicClient>>) -> Redirect {
@@ -114,3 +118,13 @@ pub async fn google_get_user_info(access_token: &AccessToken) -> Option<GoogleUs
         None
     }
 }
+
+// pub async fn insert_user_bad(pool: &Pool<Mssql>, email: &str, name: &str) -> Result<(), sqlx::Error> {
+//     let query = "INSERT INTO users (email, name) VALUES ($1, $2)";
+//     sqlx::query(query)
+//         .bind(email)
+//         .bind(name)
+//         .execute(pool)
+//         .await?;
+//     Ok(())
+// }

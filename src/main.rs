@@ -3,19 +3,28 @@ use oauth2::{basic::BasicClient, AuthUrl, ClientId, ClientSecret, RedirectUrl, T
 
 use leptos::logging::log;
 use std::sync::Arc;
-use tokio::sync::Mutex;
+use tokio::{net::TcpStream, sync::Mutex};
+use tokio_util::compat::TokioAsyncWriteCompatExt;
 mod server;
 use server::{google_auth, google_callback};
+use tiberius::Client;
+
+#[derive(Clone)]
+struct AppState {
+    db_client: Arc<Mutex<tiberius::Client<tokio_util::compat::Compat<tokio::net::TcpStream>>>>,
+    oauth_client: Arc<Mutex<BasicClient>>,
+}
 
 #[cfg(feature = "ssr")]
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     use dotenv::from_filename;
     use leptos::logging::log;
     use leptos::prelude::*;
     use leptos_axum::{generate_route_list, LeptosRoutes};
     use nim::app::*;
     use std::env;
+    use tiberius::{Client, Config, AuthMethod};
 
     // Load the .env file
     from_filename(".env.dev").ok();
@@ -25,6 +34,25 @@ async fn main() {
     let leptos_options = conf.leptos_options;
     // Generate the list of routes in your Leptos App
     let routes = generate_route_list(App);
+
+    // Get the database connection details from the environment
+    let server = env::var("DATABASE_SERVER").expect("DATABASE_SERVER must be set");
+    let database = env::var("DATABASE_NAME").expect("DATABASE_NAME must be set");
+    let user = env::var("DATABASE_USER").expect("DATABASE_USER must be set");
+    let password = env::var("DATABASE_PASSWORD").expect("DATABASE_PASSWORD must be set");
+    let database_port = env::var("DATABASE_PORT").expect("DATABASE_PORT must be set").parse::<u16>().expect("DATABASE_PORT must be a valid u16");
+
+    // Configure the connection
+    let mut config = Config::new();
+    config.host(&server);
+    config.port(database_port);
+    config.authentication(AuthMethod::sql_server(&user, &password));
+    config.database(&database);
+
+    // Connect to the database
+    let tcp = tokio::net::TcpStream::connect(config.get_addr()).await?;
+    tcp.set_nodelay(true)?;
+    let mut client = Client::connect(config, tcp.compat_write()).await?;
 
     // Create the OAuth2 client
     let google_client_id = env::var("GOOGLE_CLIENT_ID").expect("GOOGLE_CLIENT_ID must be set");
@@ -44,6 +72,11 @@ async fn main() {
         ),
     ));
 
+    let app_state = AppState {
+        db_client: Arc::new(Mutex::new(client)),
+        oauth_client: oauth_client.clone(),
+    };
+
     // Create a single HTTP client instance
     // let http_client = Arc::new(Client::new());
 
@@ -54,18 +87,15 @@ async fn main() {
         })
         .route(
             "/auth/google",
-            get({
-                let oauth_client = oauth_client.clone();
-                move || google_auth(oauth_client)
-            }),
-        )
+            get(google_auth),
+        ).with_state(app_state)
         .route(
             "/auth/google/callback",
             get({
                 let oauth_client = oauth_client.clone();
                 move |query| google_callback(oauth_client, query)
             }),
-        )
+        ).with_state(app_state)
         .fallback(leptos_axum::file_and_error_handler(shell))
         .with_state(leptos_options);
 
