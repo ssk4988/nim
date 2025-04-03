@@ -1,0 +1,92 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+/* @media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+} */
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.turn-button {
+  background-color: rgb(81, 81, 250);
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  margin: 0.5rem;
+  cursor: pointer;
+  width: 5rem;
+  transition: background-color 0.2s;
+}
+
+.icon-button {
+  background-color: rgba(0, 0, 0, 0);
+    border: 0px;
+    border-radius: 50%;
+    width: 3rem;
+    height: 3rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.icon-button:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.stone-button {
+  width: 2rem; /* Set the width using rem units */
+  height: 2rem; /* Set the height using rem units */
+  background-image: url('/images/stone.png'); /* Set the background image */
+  background-size: cover; /* Ensure the image covers the entire button */
+  background-color: rgba(0, 0, 0, 0); /* Set the background color to transparent */
+  background-position: center; /* Center the background image */
+  border: none; /* Remove the default border */
+  border-radius: 50%; /* Make the button round */
+  margin: 0.1rem;
+  cursor: pointer; /* Change cursor to pointer on hover */
+  transition: transform 0.2s; /* Smooth transition for scaling */
+}
+
+.stone-button:hover, .stone-button:hover ~ .stone-button {
+  transform: scale(1.1); /* Scale up the button on hover */
+  opacity: 0.9; /* Reduce opacity on hover */
+  filter: sepia(1) saturate(5) hue-rotate(310deg) brightness(0.7);
+}
+
+.stone-button:hover, .stone-button:hover ~ .stone-button {
+  transform: scale(1.1); /* Scale up the button on hover */
+  opacity: 0.9; /* Reduce opacity on hover */
+  filter: sepia(1) saturate(5) hue-rotate(310deg) brightness(0.7);
+}
+
+.stone-button.no-hover:hover, .stone-button:hover ~ .stone-button.no-hover {
+  transform: none;
+  opacity: 1;
+  filter: none;
+}
+
+.stone-button:disabled {
+  opacity: 0.5; /* Make the button transparent */
+  cursor: not-allowed; /* Change cursor to not-allowed */
+}
