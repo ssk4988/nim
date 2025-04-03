@@ -1,7 +1,7 @@
 use std::sync::Arc;
 use tokio::sync::{Mutex, MutexGuard};
 
-use leptos::logging::log;
+use leptos::{config::LeptosOptions, logging::log};
 
 use oauth2::{
     basic::{BasicClient, BasicTokenType},
@@ -11,7 +11,10 @@ use oauth2::{reqwest::async_http_client, AuthorizationCode, CsrfToken};
 use oauth2::{EmptyExtraTokenFields, Scope, StandardTokenResponse, TokenResponse};
 
 use ::reqwest::Client;
-use axum::{extract::Query, response::Redirect};
+use axum::{extract::{Query, State}, response::Redirect};
+use sqlx::PgPool;
+use rand::Rng;
+use crate::state::AppState;
 
 use serde::{Deserialize, Serialize};
 
@@ -113,4 +116,23 @@ pub async fn google_get_user_info(access_token: &AccessToken) -> Option<GoogleUs
     } else {
         None
     }
+}
+
+pub async fn add_random_user(
+    State((_, AppState{ oauth_client, db_pool })): State<(LeptosOptions, AppState)>,
+) {
+    let mut rng = rand::thread_rng();
+    let random_number: u32 = rng.gen_range(1..=1000);
+    let random_name = format!("User{}", random_number);
+    let random_email = format!("{}@example.com", random_name);
+    let result = sqlx::query(
+        "INSERT INTO users (name, email) VALUES ($1, $2) RETURNING id",
+    )
+    .bind(&random_name)
+    .bind(&random_email)
+    .fetch_one(&db_pool)
+    .await
+    .unwrap_or_else(|_| panic!("Failed to insert user into database"));
+    // log!("Inserted user with ID: {}", result.id);
+    // return result.id;
 }

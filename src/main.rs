@@ -4,8 +4,16 @@ use oauth2::{basic::BasicClient, AuthUrl, ClientId, ClientSecret, RedirectUrl, T
 use leptos::logging::log;
 use std::sync::Arc;
 use tokio::sync::Mutex;
+use sqlx::postgres::PgPoolOptions;
+use dotenv::dotenv;
+use std::env;
+
 mod server;
-use server::{google_auth, google_callback};
+use server::{google_auth, google_callback, add_random_user};
+
+mod state;
+use state::AppState;
+
 
 #[cfg(feature = "ssr")]
 #[tokio::main]
@@ -44,6 +52,18 @@ async fn main() {
         ),
     ));
 
+    // Initialize database connection and connection pool
+    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    let db_pool = PgPoolOptions::new()
+        .max_connections(5) // Set the maximum number of connections
+        .connect(&database_url)
+        .await
+        .expect("Failed to create database connection pool");
+
+    let app_state = AppState {
+        oauth_client: oauth_client.clone(),
+        db_pool: db_pool,
+    };
     // Create a single HTTP client instance
     // let http_client = Arc::new(Client::new());
 
@@ -66,8 +86,12 @@ async fn main() {
                 move |query| google_callback(oauth_client, query)
             }),
         )
+        // .route(
+        //     "/add_random_user",
+        //     get(add_random_user),
+        // )
         .fallback(leptos_axum::file_and_error_handler(shell))
-        .with_state(leptos_options);
+        .with_state((leptos_options, app_state));
 
     // run our app with hyper
     // `axum::Server` is a re-export of `hyper::Server`
