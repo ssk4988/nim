@@ -1,17 +1,24 @@
 'use client';
 
-import { signIn, useSession } from "next-auth/react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
+import { useState } from "react";
 
 export default function Signup() {
     const searchParams = useSearchParams();
-    const name = searchParams.get("name");
-    const email = searchParams.get("email");
+    const nameParam = searchParams.get("name");
+    const email = searchParams.get("email") || "";
     const token = searchParams.get("token");
-    const { data: session } = useSession();
-    console.log("session: ", session)
+    const [isLoading, setIsLoading] = useState(false)
+    const [name, setName] = useState(nameParam || "");
 
-    const handleSignup = async () => {
+    const handleSignup = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsLoading(true);
         console.log("signing up...")
         const res = await fetch("/api/auth/signup", {
             method: "POST",
@@ -47,13 +54,46 @@ export default function Signup() {
             const errorData = await res.json();
             console.error("Error: ", errorData);
         }
+        setIsLoading(false);
     }
     return (
-        <div>
-            <h1>Welcome, {session?.user?.name}! Let's complete your account setup.</h1>
-            <p> Name: {name}</p>
-            <p> Email: {email}</p>
-            <button onClick={handleSignup}>Finish Signup</button>
+        <div className="container mx-auto flex min-h-[calc(100vh-200px)] items-center justify-center px-4 py-12">
+            <Card>
+                <CardHeader>
+                    <CardTitle>Create an Account</CardTitle>
+                    <CardDescription>Welcome! Let's complete your account setup.</CardDescription>
+                </CardHeader>
+                <form onSubmit={handleSignup}>
+                    <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="signup-email">Email</Label>
+                            <Input
+                                id="signup-email"
+                                type="email"
+                                placeholder="example@example.com"
+                                value={email}
+                                disabled
+                                required
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="name">Name</Label>
+                            <Input
+                                id="name"
+                                type="text"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                required
+                            />
+                        </div>
+                    </CardContent>
+                    <CardFooter>
+                        <Button type="submit" className="w-full" disabled={isLoading}>
+                            {isLoading ? "Creating Account..." : "Create Account"}
+                        </Button>
+                    </CardFooter>
+                </form>
+            </Card>
         </div>
     );
 }
