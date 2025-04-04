@@ -1,10 +1,16 @@
 'use client';
+import { Button } from "@/components/ui/button";
 import { NimState } from "@/games/nim";
+import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
+import { GameMenu } from "../game-menu";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 export default function NimPlayer() {
+    const { data: session } = useSession();
+    const user = session?.user;
+    // Initialize game state
     let [board, setBoard] = useState<NimState>(NimState.gen());
-    let playerTurn = board.turn;
     let [pickedSide, setPickedSide] = useState<boolean>(false);
     let [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
 
@@ -30,15 +36,40 @@ export default function NimPlayer() {
         console.log("Grundy Value: ", board.grundyValue());
     }, [board]);
 
+    // mark that a game has been played
+    useEffect(() => {
+        if (!session) return;
+        if (!pickedSide) return;
+        if (!board.isGameOver()) return;
+        console.log("Game over, marking game as played");
+        const markGamePlayed = async () => {
+            const response = await fetch("/api/games/track", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+            if (response.ok) {
+                const data = await response.json();
+                console.log("Game marked as played: ", data);
+            } else {
+                console.error("Failed to mark game as played");
+                const errorData = await response.json();
+                console.error("Error: ", errorData);
+            }
+        };
+        markGamePlayed();
+    }, [session, board, pickedSide]);
+
     let piles = board.piles.map((pile, index) => {
         if (pile === 0) return null;
         let stones = [];
-        let disabled = !playerTurn || !pickedSide;
+        let disabled = !board.turn || !pickedSide;
         for (let i = 1; i <= pile; i++) {
             stones.push(
                 <button
                     key={i}
-                    className="stone-button" 
+                    className={`stone-button ${disabled ? "no-hover":""}`}
                     onClick={() => {
                         console.log("Clicked pile: ", index, " amount: ", i);
                         if (disabled) return;
@@ -54,16 +85,16 @@ export default function NimPlayer() {
             );
         }
         stones.reverse();
-        return (<div key={index} className="flex flex-col-reverse items-center justify-center mx-3">{stones}</div>);
+        return (<div key={index} className="flex flex-col-reverse items-center justify-center">{stones}</div>);
     });
 
     let statusMessage = "";
     if (!pickedSide) {
         statusMessage = "Would you like to play first or second?";
     } else if (board.isGameOver()) {
-        statusMessage = playerTurn ? "You lose!" : "You win!";
+        statusMessage = board.turn ? "You lose!" : "You win!";
     } else {
-        statusMessage = playerTurn ? "It's your turn!" : "Computer is thinking...";
+        statusMessage = board.turn ? "It's your turn!" : "Computer is thinking...";
     }
 
     let sidebar = (
@@ -91,30 +122,26 @@ export default function NimPlayer() {
         </dialog>
     );
 
-    let turnPrompt = <div className="flex justify-center mt-4">
-        <button onClick={() => setPickedSide(true)} className="turn-button">First</button>
-        <button onClick={() => {
+    let turnPrompt = <div className="flex justify-center mt-4 gap-2">
+        <Button variant="outline" className="w-20" onClick={() => setPickedSide(true)}>First</Button>
+        <Button variant="outline" className="w-20" onClick={() => {
             setPickedSide(true);
             setBoard(board => {
                 board.turn = false;
                 return board;
             });
-        }} className="turn-button">Second</button>
+        }}>Second</Button>
     </div>
 
-    let menu = <div className="absolute top-4 right-4">
-        <button onClick={() => setSidebarOpen(!sidebarOpen)} className="icon-button">
-            <span className="material-icons">help_outline</span>
-        </button>
-        <button onClick={() => {
+    let menu = <GameMenu 
+        onHelp={() => setSidebarOpen(!sidebarOpen)} 
+        onRestart={() => {
             setBoard(NimState.gen());
             setPickedSide(false);
             setSidebarOpen(false);
             console.log("New game started");
-        }} className="icon-button">
-            <span className="material-icons">refresh</span>
-        </button>
-        <button onClick={() => {
+        }}
+        onUndo={() => {
             const newBoard = new NimState([...board.piles], board.turn, [...board.moves]);
             if (newBoard.turn) {
                 console.log("Player turn, undoing move");
@@ -123,23 +150,43 @@ export default function NimPlayer() {
             console.log("Computer turn, undoing move");
             newBoard.undoMove();
             setBoard(newBoard);
-        }} className="icon-button">
-            <span className="material-icons">undo</span>
-        </button>
-    </div>
+        }}
+    />
+
+    let sheet = <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+        <SheetContent side="left" className="w-[20rem]">
+            <h2 className="text-lg font-bold">Rules</h2>
+            <p>
+                Nim is a mathematical game of strategy in which two players take turns removing stones from piles. On each turn, a player must pick a pile and remove at least one stone from it. The goal of the game is to be the player who removes the last stone.
+            </p>
+            <h2 className="text-lg font-bold">How to Play</h2>
+            <p>
+                To play, select a pile and remove any number of stones from it. The player who removes the last stone wins the game.
+            </p>
+            <p>
+                For more information, visit&nbsp;
+                <a
+                    href="https://brilliant.org/wiki/nim/"
+                    target="_blank"
+                    className="text-blue-500 hover:underline"
+                >
+                    Brilliant's Article on Nim
+                </a>
+            </p>
+        </SheetContent>
+    </Sheet>
 
     return (
-        <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
-            <h1 className="text-2xl font-bold mb-4">Nim Game</h1>
+        <div className="container mx-auto flex flex-col items-center h-screen relative">
+            <h1 className="text-2xl font-bold my-8">Nim Game</h1>
             {menu}
-            <div className="flex flex-col items-center justify-center">
-                <div className="text-lg font-semibold">{statusMessage}</div>
-                <div className="flex flex-row items-end justify-center mb-4">
+            <div className="text-lg">{statusMessage}</div>
+            {!pickedSide && turnPrompt}
+                <div className="flex flex-row items-end justify-center gap-9 mt-8">
                     {piles}
                 </div>
-                {!pickedSide && turnPrompt}
-            </div>
             {sidebar}
+            {sheet}
         </div>
     );
 }
