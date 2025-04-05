@@ -4,7 +4,7 @@ import { NimState } from "@/games/nim";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { GameMenu } from "../game-menu";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { GameSidebar } from "../game-sidebar";
 
 export default function NimPlayer() {
     const { data: session } = useSession();
@@ -69,7 +69,7 @@ export default function NimPlayer() {
             stones.push(
                 <button
                     key={i}
-                    className={`stone-button ${disabled ? "no-hover":""}`}
+                    className={`stone-button ${disabled ? "no-hover" : ""}`}
                     onClick={() => {
                         console.log("Clicked pile: ", index, " amount: ", i);
                         if (disabled) return;
@@ -97,31 +97,6 @@ export default function NimPlayer() {
         statusMessage = board.turn ? "It's your turn!" : "Computer is thinking...";
     }
 
-    let sidebar = (
-        <dialog
-            open={sidebarOpen}
-            className="w-[20rem] bg-opacity-50 padding-4 margin-4 border-1">
-            <h2>Rules</h2>
-            <p>
-                Nim is a mathematical game of strategy in which two players take turns removing stones from piles. On each turn, a player must pick a pile and remove at least one stone from it. The goal of the game is to be the player who removes the last stone.
-            </p>
-            <h2>How to Play</h2>
-            <p>
-                To play, select a pile and remove any number of stones from it. The player who removes the last stone wins the game.
-            </p>
-            <p>
-                For more information, visit
-                <a
-                    href="https://brilliant.org/wiki/nim/"
-                    target="_
-                        blank"
-                >
-                    Brilliant's Article on Nim
-                </a>
-            </p>
-        </dialog>
-    );
-
     let turnPrompt = <div className="flex justify-center mt-4 gap-2">
         <Button variant="outline" className="w-20" onClick={() => setPickedSide(true)}>First</Button>
         <Button variant="outline" className="w-20" onClick={() => {
@@ -133,8 +108,8 @@ export default function NimPlayer() {
         }}>Second</Button>
     </div>
 
-    let menu = <GameMenu 
-        onHelp={() => setSidebarOpen(!sidebarOpen)} 
+    let menu = <GameMenu
+        onHelp={() => setSidebarOpen(!sidebarOpen)}
         onRestart={() => {
             setBoard(NimState.gen());
             setPickedSide(false);
@@ -153,40 +128,37 @@ export default function NimPlayer() {
         }}
     />
 
-    let sheet = <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-        <SheetContent side="left" className="w-[20rem]">
-            <h2 className="text-lg font-bold">Rules</h2>
-            <p>
-                Nim is a mathematical game of strategy in which two players take turns removing stones from piles. On each turn, a player must pick a pile and remove at least one stone from it. The goal of the game is to be the player who removes the last stone.
-            </p>
-            <h2 className="text-lg font-bold">How to Play</h2>
-            <p>
-                To play, select a pile and remove any number of stones from it. The player who removes the last stone wins the game.
-            </p>
-            <p>
-                For more information, visit&nbsp;
-                <a
-                    href="https://brilliant.org/wiki/nim/"
-                    target="_blank"
-                    className="text-blue-500 hover:underline"
-                >
-                    Brilliant's Article on Nim
-                </a>
-            </p>
-        </SheetContent>
-    </Sheet>
+    let sidebar = <GameSidebar open={sidebarOpen} onOpenChange={setSidebarOpen}>
+        <h2 className="text-lg font-bold">Rules</h2>
+        <p>
+            Nim is a mathematical game of strategy in which two players take turns removing stones from piles. On each turn, a player must pick a pile and remove at least one stone from it. The goal of the game is to be the player who removes the last stone.
+        </p>
+        <h2 className="text-lg font-bold">How to Play</h2>
+        <p>
+            To play, select a pile and remove any number of stones from it. The player who removes the last stone wins the game.
+        </p>
+        <p>
+            For more information, visit&nbsp;
+            <a
+                href="https://brilliant.org/wiki/nim/"
+                target="_blank"
+                className="text-blue-500 hover:underline"
+            >
+                Brilliant's Article on Nim
+            </a>
+        </p>
+    </GameSidebar>
 
     return (
-        <div className="container mx-auto flex flex-col items-center h-screen relative">
+        <div className="container mx-auto flex flex-col items-center relative" style={{ height: "calc(100vh - var(--navbar-height))" }}>
             <h1 className="text-2xl font-bold my-8">Nim Game</h1>
             {menu}
             <div className="text-lg">{statusMessage}</div>
             {!pickedSide && turnPrompt}
-                <div className="flex flex-row items-end justify-center gap-9 mt-8">
-                    {piles}
-                </div>
+            <div className="flex flex-row items-end justify-center gap-9 mt-8 min-h-[200px]">
+                {piles}
+            </div>
             {sidebar}
-            {sheet}
         </div>
     );
 }
