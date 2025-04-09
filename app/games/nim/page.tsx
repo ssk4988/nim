@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { NimState } from "@/games/nim";
 import { useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { GameMenu } from "../game-menu";
 import { GameSidebar } from "../game-sidebar";
 
@@ -12,21 +12,21 @@ export default function NimPlayer() {
     let [board, setBoard] = useState<NimState>(NimState.gen());
     let [pickedSide, setPickedSide] = useState<boolean>(false);
     let [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
+    let computerRef = useRef<NodeJS.Timeout | null>(null);
 
     // Computer AI
     useEffect(() => {
         if (board.turn || !pickedSide || board.isGameOver()) return;
-        setTimeout(() => {
-            setBoard(board => {
-                if (board.turn || !pickedSide || board.isGameOver()) return board;
-                let move = board.optimalMove();
-                const newBoard = board.clone();
-                if (!newBoard.applyMove(move)) {
-                    console.log("Invalid computer move: ", move);
-                }
-                return newBoard;
-            });
+        let timer = setTimeout(() => {
+            if (board.turn || !pickedSide || board.isGameOver()) return;
+            let move = board.optimalMove();
+            const newBoard = board.clone();
+            if (!newBoard.applyMove(move)) {
+                console.log("Invalid computer move: ", move);
+            }
+            setBoard(newBoard);
         }, 1000);
+        computerRef.current = timer;
     }, [board, pickedSide]);
 
     // Print out game state for debugging
@@ -116,6 +116,10 @@ export default function NimPlayer() {
             console.log("New game started");
         }}
         onUndo={() => {
+            if(computerRef.current) {
+                clearTimeout(computerRef.current);
+                computerRef.current = null;
+            }
             const newBoard = board.clone();
             if (newBoard.turn) {
                 console.log("Player turn, undoing move");
