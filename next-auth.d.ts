@@ -7,7 +7,13 @@ declare module "next-auth" {
             name: string;
             email: string;
             image?: string;
+            token: string; // Add the custom `token` field, JWT of id, name, email
         };
+    }
+    interface TokenInfo {
+        id: number; // Add the custom `id` field
+        name: string;
+        email: string;
     }
 }
 

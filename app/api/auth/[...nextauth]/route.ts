@@ -92,6 +92,13 @@ export const authOptions: NextAuthOptions = {
                         if(dbUser.email) session.user.email = dbUser.email;
                     }
                 }
+                if(!session.user.token) {
+                    session.user.token = jwt.sign(
+                        { email: session.user.email, name: session.user.name, id: session.user.id },
+                        process.env.JWT_SECRET!,
+                        { expiresIn: "1d" } // 1 day
+                    );
+                }
             }
             return session;
         }

@@ -9,7 +9,7 @@ export default function GamePicker() {
         { game: 'Multi Knight', path: '/games/multiknight', description: 'Move multiple knights', img: 'multiknight' },
     ];
     const gameTiles = games.map((game) => (
-        <GameTile {...game} key={game.game}/>
+        <GameTile {...game} key={game.game} />
     ));
     return (
         <div className="grid grid-cols-4 sm:grid-cols-4 gap-4">
