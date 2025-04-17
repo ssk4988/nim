@@ -2,7 +2,7 @@
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 
-type GameTileProps = {
+interface GameTileProps {
     game: string;
     path: string;
     description: string;

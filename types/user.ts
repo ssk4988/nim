@@ -1,4 +1,4 @@
-export type User = {
+export interface User {
     createdat: string;
     email: string;
     games: number;

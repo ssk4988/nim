@@ -1,6 +1,6 @@
 'use client';
 import { Button } from "@/components/ui/button";
-import { KnightState } from "@/games/loneknight";
+import { LoneKnightState } from "@/games/loneknight";
 import { useSession } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
 import { GameMenu } from "../game-menu";
@@ -11,7 +11,7 @@ import { knightValidMoves, knightDirections } from "@/games/knight";
 export default function LoneKnightPlayer() {
     const { data: session } = useSession();
     // Initialize game state
-    let [board, setBoard] = useState<KnightState>(KnightState.gen());
+    let [board, setBoard] = useState<LoneKnightState>(LoneKnightState.gen());
     let [pickedSide, setPickedSide] = useState<boolean>(false);
     let [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
     let computerRef = useRef<NodeJS.Timeout | null>(null);
@@ -74,9 +74,9 @@ export default function LoneKnightPlayer() {
         });
     }
     let rows = [];
-    for (let i = 0; i < KnightState.boardHeight; i++) {
+    for (let i = 0; i < LoneKnightState.boardHeight; i++) {
         let row = [];
-        for (let j = 0; j < KnightState.boardWidth; j++) {
+        for (let j = 0; j < LoneKnightState.boardWidth; j++) {
             let isKnight = i === board.knightPosition.row && j === board.knightPosition.col;
             let className = "w-8 h-8 border flex items-center justify-center";
             let tileColor = 'bg-gray-200';
@@ -124,7 +124,7 @@ export default function LoneKnightPlayer() {
     let menu = <GameMenu
         onHelp={() => setSidebarOpen(!sidebarOpen)}
         onRestart={() => {
-            setBoard(KnightState.gen());
+            setBoard(LoneKnightState.gen());
             setPickedSide(false);
             setSidebarOpen(false);
             console.log("New game started");

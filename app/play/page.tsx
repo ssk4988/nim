@@ -1,54 +1,75 @@
 'use client';
-import { useEffect, useState } from "react";
-import { io, Socket } from "socket.io-client";
+import { useContext, useEffect, useState } from "react";
+import { io } from "socket.io-client";
 import { Button } from "@/components/ui/button";
 import { useSession } from "next-auth/react";
+import { SocketContext } from "./socket-context";
+import { GameContext } from "./game-context";
+import { Game } from "@/types/websocket";
+import { useRouter } from "next/navigation";
 
 export default function PlayPage() {
-    const [socket, setSocket] = useState<Socket | null>(null);
+    const { socket, setSocket } = useContext(SocketContext);
+    const { gameData, setGameData } = useContext(GameContext);
     const [wsError, setWsError] = useState<string | null>(null);
     const [messages, setMessages] = useState<string[]>([]);
+    const router = useRouter();
     const { data: session } = useSession();
     console.log("Session data: ", session);
     const token = session?.user?.token;
 
     useEffect(() => {
-        console.log("Connecting to WebSocket server at ", process.env.NEXT_PUBLIC_WEBSOCKET_URL);
-        if (!token) {
-            console.error("No token found in session");
+        if (!socket) {
+            console.log("Socket doesn't exist");
             return;
         }
-        // Create a new WebSocket connection
-        const socketInstance = io(process.env.NEXT_PUBLIC_WEBSOCKET_URL, {
-            auth: {
-                token: token
-            }
-        });
-        setSocket(socketInstance);
+        setWsError(null);
 
         // Listen for messages
-        socketInstance.on("message", (data: string) => {
+        socket.on("message", (data: string) => {
             setMessages((prev) => [...prev, data]);
         });
-        socketInstance.send("message", "Hello from client");
 
         // Handle connection errors
-        socketInstance.on("connection_error", (error) => {
+        socket.on("connection_error", (error) => {
             console.error("Error:", error);
             setWsError(error);
         });
-        socketInstance.on("disconnect", (error) => {
+        // handle queueing errors
+        socket.on("queue_error", (error) => {
+            console.error("Queue Error:", error);
+            setWsError(error);
+        });
+        // Handle disconnection
+        socket.on("disconnect", (error) => {
             console.error("Disconnect:", error);
             setSocket(null);
         });
 
+        // handle queue success - event for successfully adding player to queue
+        socket.on("queue_success", (data: string) => {
+            console.log("Queue Success:", data);
+            setMessages((prev) => [...prev, data]);
+        });
+
+        socket.on("game_start", (data: Game<any>) => {
+            console.log("Game Start:", data);
+            const gameCode = data.code;
+            setGameData(data);
+            router.push("/play/nim/" + gameCode);
+        });
+
         // Cleanup on component unmount
         return () => {
-            socketInstance.disconnect();
-            setSocket(null);
+            socket.off("message");
+            socket.off("connection_error");
+            socket.off("queue_error");
+            socket.off("disconnect");
+            socket.off("queue_success");
+            socket.off("game_start");
+            console.log("Socket listeners removed");
         };
-
-    }, [session]);
+    }, [socket]);
 
     return (
         <div className="grid grid-cols-4 sm:grid-cols-4 gap-4">
@@ -77,6 +98,11 @@ export default function PlayPage() {
             }}>
                 Send Message
             </Button>
+            {socket && <Button onClick={() => {
+                socket.emit("queue", "nim");
+            }}>
+                Add to Queue
+            </Button>}
         </div>
     );
 }

@@ -1,4 +1,4 @@
 /** Represents a move in the Marbles game */
-export type MarblesMove = {
+export interface MarblesMove {
     amount: number; // Number of items removed
 };

@@ -31,7 +31,8 @@ export default function RootLayout({
     <html lang="en">
       <head>
       </head>
-      <SessionProvider>
+      {/* prevent auth refresh when switching windows for now since it causes websocket disconnect */}
+      <SessionProvider refetchOnWindowFocus={false}>
         <body
           className={inter.className}
         >

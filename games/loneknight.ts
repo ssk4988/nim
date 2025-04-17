@@ -4,7 +4,7 @@ import { knightValidMoves, knightDirections, knightGrundyValues, knightShortestP
 const boardWidth = 8;
 const boardHeight = 8;
 /** Represents the state of the Knight game */
-export class KnightState {
+export class LoneKnightState {
     public static boardWidth = boardWidth;
     public static boardHeight = boardHeight;
     public knightPosition: Cell;
@@ -22,8 +22,8 @@ export class KnightState {
     }
 
     /** Clones the game state */
-    clone(): KnightState {
-        return new KnightState(
+    clone(): LoneKnightState {
+        return new LoneKnightState(
             { ...this.knightPosition },
             this.turn,
             [...this.moves]
@@ -31,7 +31,7 @@ export class KnightState {
     }
 
     /** Generates a random game state */
-    static gen(): KnightState {
+    static gen(): LoneKnightState {
         let position: Cell = { row: 0, col: 0 };
         let hasMove = false;
         // Ensure the knight has at least one valid move
@@ -42,7 +42,7 @@ export class KnightState {
             };
         } while (knightShortestPath[position.row][position.col] <= 1);
         const turn = true; // Player's turn
-        return new KnightState(position, turn);
+        return new LoneKnightState(position, turn);
     }
 
     /** Checks if the game is over */
