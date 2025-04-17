@@ -7,6 +7,7 @@ import { GameMenu } from "../game-menu";
 import { GameSidebar } from "../game-sidebar";
 import { cn } from "@/lib/utils";
 import { knightValidMoves, knightDirections } from "@/games/knight";
+import TurnPrompt from "../turn-prompt";
 
 export default function LoneKnightPlayer() {
     const { data: session } = useSession();
@@ -63,8 +64,8 @@ export default function LoneKnightPlayer() {
     }, [session, board, pickedSide]);
 
     let isPlayerTurn = board.turn && pickedSide;
-    let moveSpots: {row: number, col: number, direction: number}[] = [];
-    if(isPlayerTurn){
+    let moveSpots: { row: number, col: number, direction: number }[] = [];
+    if (isPlayerTurn) {
         moveSpots = knightValidMoves(board.knightPosition.row, board.knightPosition.col).map(move => {
             return {
                 row: board.knightPosition.row + knightDirections[move.direction].row,
@@ -81,10 +82,10 @@ export default function LoneKnightPlayer() {
             let className = "w-8 h-8 border flex items-center justify-center";
             let tileColor = 'bg-gray-200';
             let cell = null;
-            if(isKnight) {
+            if (isKnight) {
                 cell = "♞";
                 tileColor = "bg-blue-500";
-            } else if(moveSpots.some(spot => spot.row === i && spot.col === j)) {
+            } else if (moveSpots.some(spot => spot.row === i && spot.col === j)) {
                 let direction = moveSpots.find(spot => spot.row === i && spot.col === j)!.direction;
                 cell = <Button onClick={() => {
                     let newBoard = board.clone();
@@ -110,16 +111,21 @@ export default function LoneKnightPlayer() {
         statusMessage = board.turn ? "It's your turn!" : "Computer is thinking...";
     }
 
-    let turnPrompt = <div className="flex justify-center mt-4 gap-2">
-        <Button variant="outline" className="w-20" onClick={() => setPickedSide(true)}>First</Button>
-        <Button variant="outline" className="w-20" onClick={() => {
+    let turnPrompt = <TurnPrompt
+        firstAction={() => {
+            setPickedSide(true);
+            setBoard(board => {
+                board.turn = true;
+                return board;
+            });
+        }}
+        secondAction={() => {
             setPickedSide(true);
             setBoard(board => {
                 board.turn = false;
                 return board;
             });
-        }}>Second</Button>
-    </div>
+        }} />
 
     let menu = <GameMenu
         onHelp={() => setSidebarOpen(!sidebarOpen)}
@@ -130,7 +136,7 @@ export default function LoneKnightPlayer() {
             console.log("New game started");
         }}
         onUndo={() => {
-            if(computerRef.current) {
+            if (computerRef.current) {
                 clearTimeout(computerRef.current);
                 computerRef.current = null;
             }
@@ -147,7 +153,7 @@ export default function LoneKnightPlayer() {
 
     let sidebar = <GameSidebar open={sidebarOpen} onOpenChange={setSidebarOpen}>
         <h2 className="text-lg font-bold">Rules</h2>
-        <p>Players take turns moving the knight on the board. The player who moves the knight last before it 
+        <p>Players take turns moving the knight on the board. The player who moves the knight last before it
             is unable to move anymore wins.</p>
         <h2 className="text-lg font-bold">How to Play</h2>
         <p>

@@ -41,7 +41,7 @@ export class LoneKnightState {
                 col: Math.floor(Math.random() * boardWidth),
             };
         } while (knightShortestPath[position.row][position.col] <= 1);
-        const turn = true; // Player's turn
+        const turn = false; // Player's turn
         return new LoneKnightState(position, turn);
     }
 

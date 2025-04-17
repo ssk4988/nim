@@ -23,7 +23,7 @@ export class NimState {
         const piles = Array.from({ length: numPiles }, () =>
             Math.floor(Math.random() * (6 - 1 + 1)) + 1 // Random number between 1 and 6
         );
-        const turn = true;
+        const turn = false;
         return new NimState(piles, turn);
     }
 

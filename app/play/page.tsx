@@ -52,7 +52,7 @@ export default function PlayPage() {
             setMessages((prev) => [...prev, data]);
         });
 
-        socket.on("game_start", (data: Game<any>) => {
+        socket.on("game_info", (data: Game<any>) => {
             console.log("Game Start:", data);
             const gameCode = data.code;
             setGameData(data);

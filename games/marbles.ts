@@ -22,7 +22,7 @@ export class MarblesState {
     /** Generates a random game state */
     static gen(): MarblesState {
         const marbles = Math.floor(Math.random() * (20 - 10 + 1)) + 10; // Random number between 10 and 20
-        const turn = true;
+        const turn = false;
         return new MarblesState(marbles, turn);
     }
 
