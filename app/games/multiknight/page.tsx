@@ -1,6 +1,6 @@
 'use client';
 import { Button } from "@/components/ui/button";
-import { KnightState } from "@/games/multiknight";
+import { MultiKnightState } from "@/games/multiknight";
 import { useSession } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
 import { GameMenu } from "../game-menu";
@@ -8,16 +8,12 @@ import { GameSidebar } from "../game-sidebar";
 import { cn } from "@/lib/utils";
 import { Badge } from "@radix-ui/themes";
 import { knightDirections, knightValidMoves } from "@/games/knight";
-
-type Cell = {
-    row: number;
-    col: number;
-};
+import { Cell } from "@/types/knight";
 
 export default function MultiKnightPlayer() {
     const { data: session } = useSession();
     // Initialize game state
-    let [board, setBoard] = useState<KnightState>(KnightState.gen());
+    let [board, setBoard] = useState<MultiKnightState>(MultiKnightState.gen());
     let [pickedSide, setPickedSide] = useState<boolean>(false);
     let [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
     let computerRef = useRef<NodeJS.Timeout | null>(null);
@@ -83,9 +79,9 @@ export default function MultiKnightPlayer() {
         });
     }
     let rows = [];
-    for (let i = 0; i < KnightState.boardHeight; i++) {
+    for (let i = 0; i < MultiKnightState.boardHeight; i++) {
         let row = [];
-        for (let j = 0; j < KnightState.boardWidth; j++) {
+        for (let j = 0; j < MultiKnightState.boardWidth; j++) {
             let hasKnight = board.grid[i][j] > 0;
             let isMoveSpot = moveSpots.some(spot => spot.row === i && spot.col === j);
             let className = "w-8 h-8 border flex items-center justify-center";
@@ -155,7 +151,7 @@ export default function MultiKnightPlayer() {
     let menu = <GameMenu
         onHelp={() => setSidebarOpen(!sidebarOpen)}
         onRestart={() => {
-            setBoard(KnightState.gen());
+            setBoard(MultiKnightState.gen());
             setPickedSide(false);
             setSidebarOpen(false);
             console.log("New game started");

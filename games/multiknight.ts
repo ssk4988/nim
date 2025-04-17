@@ -4,7 +4,7 @@ import { knightValidMoves, knightDirections, knightGrundyValues, knightShortestP
 const boardWidth = 8;
 const boardHeight = 8;
 /** Represents the state of the Knight game */
-export class KnightState {
+export class MultiKnightState {
     public static boardWidth = boardWidth;
     public static boardHeight = boardHeight;
     public grid: number[][];
@@ -22,8 +22,8 @@ export class KnightState {
     }
 
     /** Clones the game state */
-    clone(): KnightState {
-        return new KnightState(
+    clone(): MultiKnightState {
+        return new MultiKnightState(
             { ...this.grid },
             this.turn,
             [...this.moves]
@@ -31,7 +31,7 @@ export class KnightState {
     }
 
     /** Generates a random game state */
-    static gen(): KnightState {
+    static gen(): MultiKnightState {
         let numberOfKnights = Math.floor(Math.random() * 5) + 3; // Random number of knights between 3 and 7
         let grid = Array.from({ length: boardHeight }, () => Array(boardWidth).fill(0));
         for (let i = 0; i < numberOfKnights; i++) {
@@ -44,7 +44,7 @@ export class KnightState {
             grid[row][col] += 1;
         }
         const turn = true; // Player's turn
-        return new KnightState(grid, turn);
+        return new MultiKnightState(grid, turn);
     }
 
     /** Checks if the game is over */
