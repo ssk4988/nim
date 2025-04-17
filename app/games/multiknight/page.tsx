@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@radix-ui/themes";
 import { knightDirections, knightValidMoves } from "@/games/knight";
 import { Cell } from "@/types/knight";
+import TurnPrompt from "../turn-prompt";
 
 export default function MultiKnightPlayer() {
     const { data: session } = useSession();
@@ -67,8 +68,8 @@ export default function MultiKnightPlayer() {
     }, [session, board, pickedSide]);
 
     let isPlayerTurn = board.turn && pickedSide;
-    let moveSpots: {row: number, col: number, direction: number}[] = [];
-    if(isPlayerTurn && selectedCell != null){
+    let moveSpots: { row: number, col: number, direction: number }[] = [];
+    if (isPlayerTurn && selectedCell != null) {
         let { row, col } = selectedCell;
         moveSpots = knightValidMoves(row, col).map(move => {
             return {
@@ -87,8 +88,8 @@ export default function MultiKnightPlayer() {
             let className = "w-8 h-8 border flex items-center justify-center";
             let tileColor = 'bg-gray-200';
             let cell = null;
-            let clickAction = () => {};
-            if(isMoveSpot) {
+            let clickAction = () => { };
+            if (isMoveSpot) {
                 let direction = moveSpots.find(spot => spot.row === i && spot.col === j)!.direction;
                 clickAction = () => {
                     let newBoard = board.clone();
@@ -97,11 +98,11 @@ export default function MultiKnightPlayer() {
                     setSelectedCell(null);
                 }
                 tileColor = "bg-green-200";
-            } else if(hasKnight) {
+            } else if (hasKnight) {
                 clickAction = () => {
                     if (isPlayerTurn) {
                         setSelectedCell(selectedCell => {
-                            if(selectedCell?.row === i && selectedCell?.col === j) return null;
+                            if (selectedCell?.row === i && selectedCell?.col === j) return null;
                             return { row: i, col: j };
                         });
                     }
@@ -112,12 +113,12 @@ export default function MultiKnightPlayer() {
                     tileColor = "bg-blue-500";
                 }
             }
-            if(hasKnight) {
+            if (hasKnight) {
                 cell = <Button onClick={clickAction}>
                     ♞
                     <Badge className="text-xs">{board.grid[i][j]}</Badge>
                 </Button>
-            } else if(moveSpots.some(spot => spot.row === i && spot.col === j)) {
+            } else if (moveSpots.some(spot => spot.row === i && spot.col === j)) {
                 cell = <Button onClick={clickAction}>•</Button>;
             }
             className = cn(className, tileColor);
@@ -137,16 +138,21 @@ export default function MultiKnightPlayer() {
         statusMessage = board.turn ? "It's your turn!" : "Computer is thinking...";
     }
 
-    let turnPrompt = <div className="flex justify-center mt-4 gap-2">
-        <Button variant="outline" className="w-20" onClick={() => setPickedSide(true)}>First</Button>
-        <Button variant="outline" className="w-20" onClick={() => {
+    let turnPrompt = <TurnPrompt
+        firstAction={() => {
+            setPickedSide(true);
+            setBoard(board => {
+                board.turn = true;
+                return board;
+            });
+        }}
+        secondAction={() => {
             setPickedSide(true);
             setBoard(board => {
                 board.turn = false;
                 return board;
             });
-        }}>Second</Button>
-    </div>
+        }} />
 
     let menu = <GameMenu
         onHelp={() => setSidebarOpen(!sidebarOpen)}
@@ -157,7 +163,7 @@ export default function MultiKnightPlayer() {
             console.log("New game started");
         }}
         onUndo={() => {
-            if(computerRef.current) {
+            if (computerRef.current) {
                 clearTimeout(computerRef.current);
                 computerRef.current = null;
             }
@@ -177,8 +183,8 @@ export default function MultiKnightPlayer() {
         <p>Players take turns moving any knight on the board. The player who makes the last move wins.</p>
         <h2 className="text-lg font-bold">How to Play</h2>
         <p>
-            To play, click on a knight and then select the square you want to move the knight to. A knight can move 
-            in an L shape, like in chess. However, it is restricted to moves that increase its distance from the 
+            To play, click on a knight and then select the square you want to move the knight to. A knight can move
+            in an L shape, like in chess. However, it is restricted to moves that increase its distance from the
             upper left corner of the board. If a knight has no more available moves, you can't move it anymore.
             The game ends when all knights are unable to move anymore.
         </p>

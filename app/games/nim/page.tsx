@@ -5,6 +5,8 @@ import { useSession } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
 import { GameMenu } from "../game-menu";
 import { GameSidebar } from "../game-sidebar";
+import TurnPrompt from "../turn-prompt";
+import NimRenderer from "./nim-renderer";
 
 export default function NimPlayer() {
     const { data: session } = useSession();
@@ -60,32 +62,13 @@ export default function NimPlayer() {
         markGamePlayed();
     }, [session, board, pickedSide]);
 
-    let piles = board.piles.map((pile, index) => {
-        if (pile === 0) return null;
-        let stones = [];
-        let disabled = !board.turn || !pickedSide;
-        for (let i = 1; i <= pile; i++) {
-            stones.push(
-                <button
-                    key={i}
-                    className={`stone-button ${disabled ? "no-hover" : ""}`}
-                    onClick={() => {
-                        console.log("Clicked pile: ", index, " amount: ", i);
-                        if (disabled) return;
-                        let move = { pile: index, amount: i };
-                        const newBoard = board.clone();
-                        if (!newBoard.applyMove(move)) {
-                            console.log("Invalid move: ", move);
-                        }
-                        setBoard(newBoard);
-                    }}
-                    disabled={disabled}
-                ></button>
-            );
+    let nimRenderer = <NimRenderer gameState={board} submitter={(move) => {
+        const newBoard = board.clone();
+        if (!newBoard.applyMove(move)) {
+            console.log("Invalid move: ", move);
         }
-        stones.reverse();
-        return (<div key={index} className="flex flex-col-reverse items-center justify-center">{stones}</div>);
-    });
+        setBoard(newBoard);
+    }} />
 
     let statusMessage = "";
     if (!pickedSide) {
@@ -96,16 +79,21 @@ export default function NimPlayer() {
         statusMessage = board.turn ? "It's your turn!" : "Computer is thinking...";
     }
 
-    let turnPrompt = <div className="flex justify-center mt-4 gap-2">
-        <Button variant="outline" className="w-20" onClick={() => setPickedSide(true)}>First</Button>
-        <Button variant="outline" className="w-20" onClick={() => {
+    let turnPrompt = <TurnPrompt
+        firstAction={() => {
+            setPickedSide(true);
+            setBoard(board => {
+                board.turn = true;
+                return board;
+            });
+        }}
+        secondAction={() => {
             setPickedSide(true);
             setBoard(board => {
                 board.turn = false;
                 return board;
             });
-        }}>Second</Button>
-    </div>
+        }} />
 
     let menu = <GameMenu
         onHelp={() => setSidebarOpen(!sidebarOpen)}
@@ -116,7 +104,7 @@ export default function NimPlayer() {
             console.log("New game started");
         }}
         onUndo={() => {
-            if(computerRef.current) {
+            if (computerRef.current) {
                 clearTimeout(computerRef.current);
                 computerRef.current = null;
             }
@@ -158,9 +146,7 @@ export default function NimPlayer() {
             {menu}
             <div className="text-lg">{statusMessage}</div>
             {!pickedSide && turnPrompt}
-            <div className="flex flex-row items-end justify-center gap-9 mt-8 min-h-[200px]">
-                {piles}
-            </div>
+            {nimRenderer}
             {sidebar}
         </div>
     );

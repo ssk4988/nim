@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
 import { GameMenu } from "../game-menu";
 import { GameSidebar } from "../game-sidebar";
+import TurnPrompt from "../turn-prompt";
 
 export default function MarblesPlayer() {
     const { data: session } = useSession();
@@ -93,16 +94,21 @@ export default function MarblesPlayer() {
         statusMessage = board.turn ? "It's your turn!" : "Computer is thinking...";
     }
 
-    let turnPrompt = <div className="flex justify-center mt-4 gap-2">
-        <Button variant="outline" className="w-20" onClick={() => setPickedSide(true)}>First</Button>
-        <Button variant="outline" className="w-20" onClick={() => {
+    let turnPrompt = <TurnPrompt
+        firstAction={() => {
+            setPickedSide(true);
+            setBoard(board => {
+                board.turn = true;
+                return board;
+            });
+        }}
+        secondAction={() => {
             setPickedSide(true);
             setBoard(board => {
                 board.turn = false;
                 return board;
             });
-        }}>Second</Button>
-    </div>
+        }} />
 
     let menu = <GameMenu
         onHelp={() => setSidebarOpen(!sidebarOpen)}
@@ -113,7 +119,7 @@ export default function MarblesPlayer() {
             console.log("New game started");
         }}
         onUndo={() => {
-            if(computerRef.current) {
+            if (computerRef.current) {
                 clearTimeout(computerRef.current);
                 computerRef.current = null;
             }

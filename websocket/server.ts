@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import { TokenInfo } from "next-auth";
 import { Game, WSState } from "../types/websocket";
-import { GameTypeEnum } from "@/types/games";
+import { GameInterface, GameTypeEnum } from "@/types/games";
 import { gameGen } from "@/games/gameUtils";
 dotenv.config();
 
@@ -52,13 +52,30 @@ const games: Map<string, Game<any>> = new Map();
 
 console.log("JWT Secret:", process.env.JWT_SECRET);
 
+// Switch players if needed
+function adjustGameForPlayer<GameState extends GameInterface<any, any>>(game: Game<GameState>, flip: boolean) {
+  let adjustedGame: Game<GameState> = {...game, gameState: game.gameState.clone()};
+  if (flip) {
+    adjustedGame.players = [game.players[1], game.players[0]];
+    adjustedGame.gameState.turn = !game.gameState.turn;
+    adjustedGame.firstPlayer = game.firstPlayer === 0 ? 1 : 0;
+    if (game.winner !== null) {
+      adjustedGame.winner = game.winner === 0 ? 1 : game.winner === 1 ? 0 : null;
+    }
+  }
+  return adjustedGame;
+}
+
 function makeGame(game: GameTypeEnum, player1: string, player2: string) {
   let gameCode = "";
   // Generate a random game code of 6 letters
-  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  for (let i = 0; i < 6; i++) {
-    gameCode += characters.charAt(Math.floor(Math.random() * characters.length));
-  }
+  do {
+    gameCode = "";
+    const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    for (let i = 0; i < 6; i++) {
+      gameCode += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+  } while (games.has(gameCode));
   console.log(`Game code: ${gameCode}`);
   // Create a new game state
   const gameState = gameGen(game);
@@ -66,12 +83,6 @@ function makeGame(game: GameTypeEnum, player1: string, player2: string) {
   const player2State = connections.get(player2);
   if (!player1State || !player2State) {
     console.log(`Error retrieving player states for game ${game}`);
-    return;
-  }
-  const player1Socket = io.sockets.sockets.get(player1State.socketId);
-  const player2Socket = io.sockets.sockets.get(player2State.socketId);
-  if (!player1Socket || !player2Socket) {
-    console.log(`Error retrieving player sockets for game ${game}`);
     return;
   }
   
@@ -86,8 +97,7 @@ function makeGame(game: GameTypeEnum, player1: string, player2: string) {
   const gameData = {
     players: [player1Data, player2Data],
     gameState: gameState,
-    sidePicker: Math.floor(Math.random() * 2),
-    pickedSide: null,
+    firstPlayer: Math.floor(Math.random() * 2),
     winner: null,
     code: gameCode,
     gameType: game,
@@ -99,9 +109,13 @@ function makeGame(game: GameTypeEnum, player1: string, player2: string) {
   player2State.gameCode = gameCode;
   // Store the game in the map
   games.set(gameCode, gameData);
+  
+  const player1Socket = player1State.socketId ? io.sockets.sockets.get(player1State.socketId) : null;
+  const player2Socket = player2State.socketId ? io.sockets.sockets.get(player2State.socketId) : null;
   // Emit the game data to both players
-  player1Socket.emit("game_start", gameData);
-  player2Socket.emit("game_start", gameData);
+  player1Socket?.emit("game_info", adjustGameForPlayer(gameData, false));
+  player2Socket?.emit("game_info", adjustGameForPlayer(gameData, true));
+  console.log(`Game data sent to players ${player1} and ${player2}`);
 }
 
 function pairGamesInQueue(game: GameTypeEnum) {
@@ -121,9 +135,19 @@ function pairGamesInQueue(game: GameTypeEnum) {
     return;
   }
   console.log(`Pairing players ${player1} and ${player2} for game ${game}`);
+  // remove the players from the queue
+  const player1State = connections.get(player1);
+  const player2State = connections.get(player2);
+  if (!player1State || !player2State) {
+    console.log(`Error retrieving player states for game ${game}`);
+    return;
+  }
+  player1State.currentQueue = null;
+  player2State.currentQueue = null;
   // create the game
   makeGame(game, player1, player2);
 }
+
 
 
 io.on("connection", (socket) => {
@@ -136,7 +160,7 @@ io.on("connection", (socket) => {
     return;
   }
   // Verify the token
-  let token_info: TokenInfo | undefined = undefined;
+  let token_info: TokenInfo | null = null;
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET!);
     console.log("Decoded token:", decoded);
@@ -147,7 +171,7 @@ io.on("connection", (socket) => {
 
   if(!token_info) {
     console.error("Token info is undefined");
-    socket.emit("connection_error", "Token info is undefined");
+    socket.emit("connection_error", "Token info is null");
     socket.disconnect();
     return;
   }
@@ -157,21 +181,42 @@ io.on("connection", (socket) => {
   const userEmail = token_info.email;
   const wsKey = `ws:${userId}`;
   const keyExists = connections.has(wsKey);
+  let wsStateTemp: WSState;
   if (keyExists) {
-    console.log(`WebSocket connection already exists for user ${userId}`);
-    socket.emit("connection_error", "WebSocket connection already exists");
-    socket.disconnect();
-    return;
+    wsStateTemp = connections.get(wsKey)!;
+    let wsExists = wsStateTemp.socketId !== null;
+    if (wsExists) {
+      console.log(`WebSocket connection already exists for user ${userId}`);
+      socket.emit("connection_error", "WebSocket connection already exists");
+      socket.disconnect();
+      return;
+    }
+    // Update the socket ID
+    wsStateTemp.socketId = socket.id;
+  } else {
+    wsStateTemp = {
+      socketId: socket.id,
+      userId: userId,
+      userEmail: userEmail,
+      currentQueue: null,
+      gameCode: null,
+    };
+    connections.set(wsKey, wsStateTemp);
   }
-  const wsState: WSState = {
-    socketId: socket.id,
-    userId: userId,
-    userEmail: userEmail,
-    currentQueue: null,
-    gameCode: null,
-  };
-  connections.set(wsKey, wsState);
+  const wsState = connections.get(wsKey)!;
   console.log(`WebSocket connection stored in map for user ${userId}:`, wsState);
+
+  // Send game info if the user is already in a game
+  if (wsState.gameCode) {
+    const gameData = games.get(wsState.gameCode);
+    if (!gameData) {
+      console.log(`Game not found for user ${userId} even though they are in a game`);
+      return;
+    }
+    const adjustedGameData = adjustGameForPlayer(gameData, gameData.players[0].userId !== userId);
+    socket.emit("game_info", adjustedGameData);
+    console.log(`Game data sent to user ${userId}:`, adjustedGameData);
+  }
 
   // Log all incoming events for debugging purposes
   socket.onAny((event, ...args) => {
@@ -203,6 +248,11 @@ io.on("connection", (socket) => {
       socket.emit("queue_error", `User is already in queue for ${wsState.currentQueue}`);
       return;
     }
+    // Check if the user is already in a game
+    if (wsState.gameCode) {
+      socket.emit("queue_error", "User is already in a game");
+      return;
+    }
     // Add the user to the queue
     queueList.push(wsKey);
     wsState.currentQueue = game;
@@ -212,6 +262,74 @@ io.on("connection", (socket) => {
     // pair players from the queue
     pairGamesInQueue(game);
   });
+
+  // handle game info requests
+  socket.on("request_game_info", (gameCode) => {
+    console.log(`User ${userId} requested game info for game code ${gameCode}`);
+    const gameData = games.get(gameCode);
+    if (!gameData) {
+      socket.emit("game_info_error", "Game not found");
+      return;
+    }
+    const inGame = wsState.gameCode === gameCode;
+    if(!inGame) {
+      socket.emit("game_info_error", "User is not in the game");
+      return;
+    }
+    const adjustedGameData = adjustGameForPlayer(gameData, gameData.players[0].userId !== userId);
+    socket.emit("game_info", adjustedGameData);
+    console.log(`Game data sent to user ${userId}:`, adjustedGameData);
+  });
+
+  // Handle game moves
+  socket.on("game_move", (gameCode, move) => {
+    console.log(`User ${userId} made a move in game ${gameCode}:`, move);
+    const gameData = games.get(gameCode);
+    if (!gameData) {
+      socket.emit("game_move_error", "Game not found");
+      return;
+    }
+    const inGame = wsState.gameCode === gameCode;
+    if(!inGame) {
+      socket.emit("game_move_error", "User is not in the game");
+      return;
+    }
+    // Apply the move to the game state
+    const newGameState = gameData.gameState.clone();
+    if (!newGameState.applyMove(move)) {
+      socket.emit("game_move_error", "Invalid move");
+      return;
+    }
+    // Update the game state
+    gameData.gameState = newGameState;
+
+    // Find the connection for both players
+    const player1Key = `ws:${gameData.players[0].userId}`;
+    const player2Key = `ws:${gameData.players[1].userId}`;
+    const player1State = connections.get(player1Key);
+    const player2State = connections.get(player2Key);
+    
+    // Check if the game is over
+    if (gameData.gameState.isGameOver()) {
+      gameData.winner = gameData.gameState.turn ? 1 : 0;
+      console.log(`Game over! Player ${gameData.winner} wins!`);
+      if (player1State) {
+        player1State.gameCode = null;
+      }
+      if (player2State) {
+        player2State.gameCode = null;
+      }
+      // Remove the game from the map
+      games.delete(gameCode);
+    }
+    
+    // Emit the updated game state to both players
+    const player1Socket = player1State?.socketId ? io.sockets.sockets.get(player1State.socketId) : null;
+    const player2Socket = player2State?.socketId ? io.sockets.sockets.get(player2State.socketId) : null;
+    player1Socket?.emit("game_info", adjustGameForPlayer(gameData, false));
+    player2Socket?.emit("game_info", adjustGameForPlayer(gameData, true));
+  });
+
 
   // Handle disconnection
   socket.on("disconnect", () => {
@@ -226,9 +344,10 @@ io.on("connection", (socket) => {
           console.log(`User ${userId} removed from queue for game ${wsState.currentQueue}`);
         }
       }
+      wsState.currentQueue = null;
     }
-    // Remove the connection from the map
-    connections.delete(wsKey);
+    // Remove the socket from the connections map
+    wsState.socketId = null;
   });
 });
 

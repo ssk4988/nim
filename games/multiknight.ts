@@ -43,7 +43,7 @@ export class MultiKnightState {
             } while (knightShortestPath[row][col] <= 1);
             grid[row][col] += 1;
         }
-        const turn = true; // Player's turn
+        const turn = false; // Player's turn
         return new MultiKnightState(grid, turn);
     }
 
