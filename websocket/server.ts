@@ -1,14 +1,16 @@
 import { createServer } from "http";
-import { Server as WebSocketServer } from "socket.io";
+import { Socket, Server as WebSocketServer } from "socket.io";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import { TokenInfo } from "next-auth";
-import { Game, WSState } from "../types/websocket";
-import { GameInterface, GameTypeEnum } from "@/types/games";
-import { gameGen } from "@/games/gameUtils";
+import { TypedSocket, Game, WSState } from "../types/websocket";
+import { GameConfig, GameTypeEnum, TimeControlEnum } from "@/types/games";
+import { KeyMap } from "./key-map";
+import { flipGamePerspective, gameStateFactory, makePublicGame } from "./game-util";
 dotenv.config();
 
 const PORT = process.env.WS_PORT || 4000;
+
 
 // Create an HTTP server for the WebSocket server
 const httpServer = createServer();
@@ -22,7 +24,7 @@ const io = new WebSocketServer(httpServer, {
 });
 
 // Middleware to check for authentication token
-io.use((socket, next) => {
+io.use((socket: TypedSocket, next) => {
   const token = socket.handshake.auth.token;
   if (!token) {
     console.log("No token provided");
@@ -38,35 +40,21 @@ io.use((socket, next) => {
 });
 
 
+
+
 // Map of connections
 const connections: Map<string, WSState> = new Map();
 
 // queue of unpaired connections for games
-const queue: Map<GameTypeEnum, string[]> = new Map();
-queue.set(GameTypeEnum.NIM, []);
+const queue: KeyMap<GameConfig, string[]> = new KeyMap();
+queue.set({ gameType: GameTypeEnum.NIM, timeControl: TimeControlEnum.MIN5 }, []);
 
 // map of games
 const games: Map<string, Game<any>> = new Map();
 
 
-
-console.log("JWT Secret:", process.env.JWT_SECRET);
-
-// Switch players if needed
-function adjustGameForPlayer<GameState extends GameInterface<any, any>>(game: Game<GameState>, flip: boolean) {
-  let adjustedGame: Game<GameState> = {...game, gameState: game.gameState.clone()};
-  if (flip) {
-    adjustedGame.players = [game.players[1], game.players[0]];
-    adjustedGame.gameState.turn = !game.gameState.turn;
-    adjustedGame.firstPlayer = game.firstPlayer === 0 ? 1 : 0;
-    if (game.winner !== null) {
-      adjustedGame.winner = game.winner === 0 ? 1 : game.winner === 1 ? 0 : null;
-    }
-  }
-  return adjustedGame;
-}
-
-function makeGame(game: GameTypeEnum, player1: string, player2: string) {
+// creates a game room for two players given the websocket keys
+function makeGameRoom(game: GameConfig, player1: string, player2: string) {
   let gameCode = "";
   // Generate a random game code of 6 letters
   do {
@@ -78,7 +66,7 @@ function makeGame(game: GameTypeEnum, player1: string, player2: string) {
   } while (games.has(gameCode));
   console.log(`Game code: ${gameCode}`);
   // Create a new game state
-  const gameState = gameGen(game);
+  const gameState = gameStateFactory(game.gameType);
   const player1State = connections.get(player1);
   const player2State = connections.get(player2);
   if (!player1State || !player2State) {
@@ -100,7 +88,7 @@ function makeGame(game: GameTypeEnum, player1: string, player2: string) {
     firstPlayer: Math.floor(Math.random() * 2),
     winner: null,
     code: gameCode,
-    gameType: game,
+    gameConfig: game,
   };
   console.log(`Game data:`, gameData);
   
@@ -112,45 +100,47 @@ function makeGame(game: GameTypeEnum, player1: string, player2: string) {
   
   const player1Socket = player1State.socketId ? io.sockets.sockets.get(player1State.socketId) : null;
   const player2Socket = player2State.socketId ? io.sockets.sockets.get(player2State.socketId) : null;
+
   // Emit the game data to both players
-  player1Socket?.emit("game_info", adjustGameForPlayer(gameData, false));
-  player2Socket?.emit("game_info", adjustGameForPlayer(gameData, true));
+  const publicGameData = makePublicGame(gameData);
+  player1Socket?.emit("game_info", flipGamePerspective(publicGameData, false));
+  player2Socket?.emit("game_info", flipGamePerspective(publicGameData, true));
   console.log(`Game data sent to players ${player1} and ${player2}`);
 }
 
-function pairGamesInQueue(game: GameTypeEnum) {
+function pairGamesInQueue(game: GameConfig) {
   const queueList = queue.get(game);
   if (!queueList) {
     console.log(`No queue for game ${game}`);
     return;
   }
   if (queueList.length < 2) {
-    console.log(`Not enough players in queue for game ${game}`);
+    console.log(`Not enough players in queue for game ${JSON.stringify(game)}`);
     return;
   }
   const player1 = queueList.shift();
   const player2 = queueList.shift();
   if (!player1 || !player2) {
-    console.log(`Error pairing players for game ${game}`);
+    console.log(`Error pairing players for game ${JSON.stringify(game)}`);
     return;
   }
-  console.log(`Pairing players ${player1} and ${player2} for game ${game}`);
+  console.log(`Pairing players ${player1} and ${player2} for game ${JSON.stringify(game)}`);
   // remove the players from the queue
   const player1State = connections.get(player1);
   const player2State = connections.get(player2);
   if (!player1State || !player2State) {
-    console.log(`Error retrieving player states for game ${game}`);
+    console.log(`Error retrieving player states for game ${JSON.stringify(game)}`);
     return;
   }
   player1State.currentQueue = null;
   player2State.currentQueue = null;
   // create the game
-  makeGame(game, player1, player2);
+  makeGameRoom(game, player1, player2);
 }
 
 
 
-io.on("connection", (socket) => {
+io.on("connection", (socket: TypedSocket) => {
   console.log(`New WebSocket connection: ${socket.id}`);
   const token = socket.handshake.auth.token;
   if (!token) {
@@ -213,7 +203,7 @@ io.on("connection", (socket) => {
       console.log(`Game not found for user ${userId} even though they are in a game`);
       return;
     }
-    const adjustedGameData = adjustGameForPlayer(gameData, gameData.players[0].userId !== userId);
+    const adjustedGameData = flipGamePerspective(gameData, gameData.players[0].userId !== userId);
     socket.emit("game_info", adjustedGameData);
     console.log(`Game data sent to user ${userId}:`, adjustedGameData);
   }
@@ -224,7 +214,7 @@ io.on("connection", (socket) => {
   });
 
   // Handle incoming messages
-  socket.on("message", (data) => {
+  socket.on("message", (data: any) => {
     console.log(`Message from ${socket.id}:`, data);
 
     // Broadcast the message to all connected clients
@@ -232,13 +222,13 @@ io.on("connection", (socket) => {
   });
 
   // Add to queue
-  socket.on("queue", (game) => {
-    if(!game) {
-      socket.emit("queue_error", "Game is required");
+  socket.on("queue", (gameConfig: GameConfig) => {
+    if(!gameConfig || !gameConfig.gameType || !gameConfig.timeControl) {
+      socket.emit("queue_error", "Game config is not formatted correctly");
       return;
     }
-    console.log(`User ${userId} added to queue for game ${game}`);
-    const queueList = queue.get(game);
+    console.log(`User ${userId} added to queue for game ${gameConfig}`);
+    const queueList = queue.get(gameConfig);
     if (!queueList) {
       socket.emit("queue_error", "Game is not supported");
       return;
@@ -255,12 +245,12 @@ io.on("connection", (socket) => {
     }
     // Add the user to the queue
     queueList.push(wsKey);
-    wsState.currentQueue = game;
-    socket.emit("queue_success", `User ${userId} added to queue for game ${game}`);
-    console.log(`Queue for game ${game}:`, queueList);
+    wsState.currentQueue = gameConfig;
+    socket.emit("queue_success", `User ${userId} added to queue for game ${gameConfig}`);
+    console.log(`Queue for game ${gameConfig}:`, queueList);
 
     // pair players from the queue
-    pairGamesInQueue(game);
+    pairGamesInQueue(gameConfig);
   });
 
   // handle game info requests
@@ -276,7 +266,7 @@ io.on("connection", (socket) => {
       socket.emit("game_info_error", "User is not in the game");
       return;
     }
-    const adjustedGameData = adjustGameForPlayer(gameData, gameData.players[0].userId !== userId);
+    const adjustedGameData = flipGamePerspective(gameData, gameData.players[0].userId !== userId);
     socket.emit("game_info", adjustedGameData);
     console.log(`Game data sent to user ${userId}:`, adjustedGameData);
   });
@@ -326,8 +316,8 @@ io.on("connection", (socket) => {
     // Emit the updated game state to both players
     const player1Socket = player1State?.socketId ? io.sockets.sockets.get(player1State.socketId) : null;
     const player2Socket = player2State?.socketId ? io.sockets.sockets.get(player2State.socketId) : null;
-    player1Socket?.emit("game_info", adjustGameForPlayer(gameData, false));
-    player2Socket?.emit("game_info", adjustGameForPlayer(gameData, true));
+    player1Socket?.emit("game_info", flipGamePerspective(gameData, false));
+    player2Socket?.emit("game_info", flipGamePerspective(gameData, true));
   });
 
 

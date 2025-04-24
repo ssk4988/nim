@@ -15,3 +15,14 @@ export interface GameInterface<GameState, Move> {
     optimalMove(): Move;
     undoMove(): void;
 }
+
+export enum TimeControlEnum {
+    MIN5 = "5m",
+    MIN1 = "1m",
+    SEC30 = "30s",
+}
+
+export interface GameConfig {
+    timeControl: TimeControlEnum;
+    gameType: GameTypeEnum;
+}

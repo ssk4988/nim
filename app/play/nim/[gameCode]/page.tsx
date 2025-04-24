@@ -3,7 +3,7 @@ import { useRouter, useParams } from "next/navigation";
 import { useContext, useEffect, useState } from "react";
 import { GameContext } from "../../game-context";
 import { NimState } from "@/games/nim";
-import { Game } from "@/types/websocket";
+import { PublicGame } from "@/types/websocket";
 import { SocketContext } from "../../socket-context";
 import { NimMove } from "@/types/nim";
 import NimRenderer from "@/app/games/nim/nim-renderer";
@@ -13,7 +13,7 @@ export default function NimLive() {
     const router = useRouter();
     const params = useParams();
     const { socket } = useContext(SocketContext);
-    const [gameData, setGameData] = useState<Game<any> | null>(null);
+    const [gameData, setGameData] = useState<PublicGame<any> | null>(null);
     const gameCodeP = params.gameCode;
     if (!gameCodeP || !socket) {
         router.replace("/play");
@@ -24,7 +24,7 @@ export default function NimLive() {
 
     // load initial game data
     useEffect(() => {
-        socket.on("game_info", (data: Game<any>) => {
+        socket.on("game_info", (data: PublicGame<any>) => {
             console.log("Game Info:", data);
             setGameData(data);
             let tempGameState = new NimState(data.gameState.piles, data.gameState.turn);
@@ -32,7 +32,7 @@ export default function NimLive() {
         });
         socket.emit("request_game_info", gameCode);
         return () => {
-            socket.off("game_info");
+            socket.removeAllListeners("game_info");
         }
     }, [socket, gameCode]);
 
