@@ -1,18 +1,22 @@
 'use client';
 
+import { ClientToServerEvents, ServerToClientEvents } from "@/types/websocket";
 import { useSession } from "next-auth/react";
 import React, { useEffect } from "react";
 import { createContext, useContext } from "react";
-import { io, Socket } from "socket.io-client";
+import { Socket } from "socket.io";
+import { io } from "socket.io-client";
+
+type TypedSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
 
 interface SocketContextType {
-    socket: Socket | null;
-    setSocket: React.Dispatch<React.SetStateAction<Socket | null>>;
+    socket: TypedSocket | null;
+    setSocket: React.Dispatch<React.SetStateAction<TypedSocket | null>>;
 }
 
 export const SocketContext = createContext<SocketContextType>({socket: null, setSocket: () => {}});
 export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [socket, setSocket] = React.useState<Socket | null>(null);
+    const [socket, setSocket] = React.useState<TypedSocket | null>(null);
     const { data: session } = useSession();
     const token = session?.user?.token;
 
@@ -27,7 +31,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             auth: {
                 token: token
             }
-        });
+        }) as unknown as TypedSocket;
 
         // Check if the connection was established after a short delay
         const connectionTimeout = setTimeout(() => {

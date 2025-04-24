@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { useSession } from "next-auth/react";
 import { SocketContext } from "./socket-context";
 import { GameContext } from "./game-context";
-import { Game } from "@/types/websocket";
+import { PublicGame } from "@/types/websocket";
 import { useRouter } from "next/navigation";
+import { GameTypeEnum, TimeControlEnum } from "@/types/games";
 
 export default function PlayPage() {
     const { socket, setSocket } = useContext(SocketContext);
@@ -52,7 +53,7 @@ export default function PlayPage() {
             setMessages((prev) => [...prev, data]);
         });
 
-        socket.on("game_info", (data: Game<any>) => {
+        socket.on("game_info", (data: PublicGame<any>) => {
             console.log("Game Start:", data);
             const gameCode = data.code;
             setGameData(data);
@@ -61,12 +62,12 @@ export default function PlayPage() {
 
         // Cleanup on component unmount
         return () => {
-            socket.off("message");
-            socket.off("connection_error");
-            socket.off("queue_error");
-            socket.off("disconnect");
-            socket.off("queue_success");
-            socket.off("game_start");
+            socket.removeAllListeners("message");
+            socket.removeAllListeners("connection_error");
+            socket.removeAllListeners("queue_error");
+            socket.removeAllListeners("disconnect");
+            socket.removeAllListeners("queue_success");
+            socket.removeAllListeners("game_start");
             console.log("Socket listeners removed");
         };
     }, [socket]);
@@ -99,9 +100,12 @@ export default function PlayPage() {
                 Send Message
             </Button>
             {socket && <Button onClick={() => {
-                socket.emit("queue", "nim");
+                socket.emit("queue", {
+                    gameType: GameTypeEnum.NIM,
+                    timeControl: TimeControlEnum.MIN5
+                });
             }}>
-                Add to Queue
+                Add to Queue: Nim 5m
             </Button>}
         </div>
     );
