@@ -15,22 +15,27 @@ export interface PublicPlayerData {
 
 // internal state of the game board, along with metadata about the game
 export interface Game<GameState extends GameInterface<any, any>> {
-    players: PlayerData[]; // List of players in the game (2 exactly)
+    players: [PlayerData, PlayerData]; // List of players in the game (2 exactly)
     gameState: GameState; // The current state of the game
     firstPlayer: number; // The player who goes first
+    playerTurn: number; // The player whose turn it is
     winner: number | null; // the index of the player who won, or null if the game is still ongoing
     code: string; // the game code
     gameConfig: GameConfig; // the type of game
+    playerTimes: [number, number]; // the time remaining for each player (in milliseconds)
+    lastUpdated: number; // the last time the game was updated (in milliseconds since epoch)
 }
 
 // public state of the game board, along with metadata about the game
 export interface PublicGame<GameState extends GameInterface<any, any>> {
-    players: PublicPlayerData[]; // List of players in the game (2 exactly)
+    players: [PublicPlayerData, PublicPlayerData]; // List of players in the game (2 exactly)
     gameState: GameState; // The current state of the game
     firstPlayer: number; // The player who goes first
     winner: number | null; // the index of the player who won, or null if the game is still ongoing
     code: string; // the game code
     gameConfig: GameConfig; // the type of game
+    playerTimes: [number, number]; // the time remaining for each player (in milliseconds)
+    lastUpdated: number; // the last time the game was updated (in milliseconds since epoch)
 }
 
 // state of the current connection

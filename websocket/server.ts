@@ -3,14 +3,17 @@ import { Socket, Server as WebSocketServer } from "socket.io";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import { TokenInfo } from "next-auth";
-import { TypedSocket, Game, WSState } from "../types/websocket";
-import { GameConfig, GameTypeEnum, TimeControlEnum } from "@/types/games";
+import { TypedSocket, Game, WSState, PlayerData } from "../types/websocket";
+import { GameConfig, GameInterface, GameTypeEnum, TimeControlEnum, timeControlToMilliseconds } from "@/types/games";
 import { KeyMap } from "./key-map";
-import { flipGamePerspective, gameStateFactory, makePublicGame } from "./game-util";
+import { flipGamePerspective, gameStateFactory, gamesToSetup, makePublicGame, shouldGameEnd, synchronizeGameTime, timeControlsToSetup } from "./game-util";
+import { PrismaClient } from "@prisma/client";
 dotenv.config();
 
 const PORT = process.env.WS_PORT || 4000;
 
+// Create a Prisma Client instance
+const prisma = new PrismaClient();
 
 // Create an HTTP server for the WebSocket server
 const httpServer = createServer();
@@ -40,18 +43,66 @@ io.use((socket: TypedSocket, next) => {
 });
 
 
-
+const EPSILON = 10; // 10ms
 
 // Map of connections
 const connections: Map<string, WSState> = new Map();
 
 // queue of unpaired connections for games
 const queue: KeyMap<GameConfig, string[]> = new KeyMap();
-queue.set({ gameType: GameTypeEnum.NIM, timeControl: TimeControlEnum.MIN5 }, []);
+
+// Initialize the queue for each game type and time control
+for (const gameType of gamesToSetup) {
+  for (const timeControl of timeControlsToSetup) {
+    queue.set({ gameType: gameType, timeControl: timeControl }, []);
+  }
+}
 
 // map of games
-const games: Map<string, Game<any>> = new Map();
+const games: Map<string, Game<GameInterface<any, any>>> = new Map();
 
+// map of game timeouts
+const gameTimeouts: Map<string, NodeJS.Timeout> = new Map();
+
+// Creates a timeout for a game
+function createGameTimeout(gameData: Game<GameInterface<any, any>>) {
+  let gameCode = gameData.code;
+  let prevGameTimeout = gameTimeouts.get(gameCode);
+  if (prevGameTimeout) {
+    clearTimeout(prevGameTimeout);
+    gameTimeouts.delete(gameCode);
+  }
+  synchronizeGameTime(gameData);
+  let timeToEnd = gameData.playerTimes[gameData.playerTurn];
+  let gameTimeout = setTimeout(() => {
+    console.log(`Game ${gameCode} timed out!`);
+    gameTimeouts.delete(gameCode);
+    const tmpGameData = games.get(gameCode);
+    if (!tmpGameData) {
+      console.log(`Game ${gameCode} not found`);
+      return;
+    }
+
+    // Check if the game is over
+    if (tmpGameData.winner !== null) {
+      return;
+    }
+    synchronizeGameTime(tmpGameData);
+
+    // Assume game should end
+
+    // let shouldEnd = shouldGameEnd(tmpGameData);
+    // if (!shouldEnd) { 
+    //   console.log(`Game room ${gameCode} is still ongoing`);
+    //   return; 
+    // }
+
+    // End the game
+    endGameRoom(tmpGameData.code);
+  }
+    , timeToEnd + EPSILON);
+  gameTimeouts.set(gameCode, gameTimeout);
+}
 
 // creates a game room for two players given the websocket keys
 function makeGameRoom(game: GameConfig, player1: string, player2: string) {
@@ -73,31 +124,37 @@ function makeGameRoom(game: GameConfig, player1: string, player2: string) {
     console.log(`Error retrieving player states for game ${game}`);
     return;
   }
-  
-  const player1Data = {
+
+  const player1Data: PlayerData = {
     userId: player1State.userId,
     name: player1State.userEmail,
   };
-  const player2Data = {
+  const player2Data: PlayerData = {
     userId: player2State.userId,
     name: player2State.userEmail,
   };
+  let firstPlayer = Math.floor(Math.random() * 2);
+  let timeMs = timeControlToMilliseconds(game.timeControl);
   const gameData = {
-    players: [player1Data, player2Data],
+    players: [player1Data, player2Data] as [PlayerData, PlayerData],
     gameState: gameState,
-    firstPlayer: Math.floor(Math.random() * 2),
+    firstPlayer: firstPlayer,
+    playerTurn: firstPlayer,
     winner: null,
     code: gameCode,
     gameConfig: game,
+    playerTimes: [timeMs, timeMs] as [number, number],
+    lastUpdated: Date.now(),
   };
+  createGameTimeout(gameData);
   console.log(`Game data:`, gameData);
-  
+
   // add the game code to the connections
   player1State.gameCode = gameCode;
   player2State.gameCode = gameCode;
   // Store the game in the map
   games.set(gameCode, gameData);
-  
+
   const player1Socket = player1State.socketId ? io.sockets.sockets.get(player1State.socketId) : null;
   const player2Socket = player2State.socketId ? io.sockets.sockets.get(player2State.socketId) : null;
 
@@ -139,6 +196,91 @@ function pairGamesInQueue(game: GameConfig) {
 }
 
 
+// End the game room and remove it from the map
+function endGameRoom(gameCode: string): boolean {
+  console.log(`Ending game room ${gameCode}`);
+  const gameData = games.get(gameCode);
+  if (!gameData) {
+    console.log(`Game ${gameCode} not found`);
+    return false;
+  }
+
+  // Find the connection for both players
+  const player1Key = `ws:${gameData.players[0].userId}`;
+  const player2Key = `ws:${gameData.players[1].userId}`;
+  const player1State = connections.get(player1Key);
+  const player2State = connections.get(player2Key);
+
+  // check if the game room has already been ended
+  if (gameData.winner !== null) {
+    console.log(`Game room ${gameCode} has already been ended`);
+    return false;
+  }
+
+
+  let shouldEnd = shouldGameEnd(gameData);
+  if (!shouldEnd) {
+    console.log(`Game room ${gameCode} is still ongoing`);
+    return false;
+  }
+  // remove the game from the map
+  games.delete(gameCode);
+
+  // clear the game timeout
+  let gameTimeout = gameTimeouts.get(gameCode);
+  if (gameTimeout) {
+    clearTimeout(gameTimeout);
+    gameTimeouts.delete(gameCode);
+  }
+
+  gameData.winner = 1 - gameData.playerTurn; // the current player is the loser
+  console.log(`Game ${gameCode} over! Player ${gameData.winner} wins!`);
+  // clear the game code for both players
+  if (player1State) {
+    player1State.gameCode = null;
+  }
+  if (player2State) {
+    player2State.gameCode = null;
+  }
+
+  // Emit the game data to both players
+  const player1Socket = player1State?.socketId ? io.sockets.sockets.get(player1State.socketId) : null;
+  const player2Socket = player2State?.socketId ? io.sockets.sockets.get(player2State.socketId) : null;
+  const publicGameData = makePublicGame(gameData);
+  player1Socket?.emit("game_info", flipGamePerspective(publicGameData, false));
+  console.log(`Game data sent to player ${player1Key}: `, flipGamePerspective(publicGameData, false));
+  player2Socket?.emit("game_info", flipGamePerspective(publicGameData, true));
+  console.log(`Game data sent to player ${player2Key}: `, flipGamePerspective(publicGameData, true));
+  console.log(`Game data sent to players ${player1Key} and ${player2Key}`);
+
+  // update database
+  const player1Id = gameData.players[0].userId;
+  const player2Id = gameData.players[1].userId;
+  prisma.users.update({
+    where: { userid: player1Id },
+    data: {
+      games: {
+        increment: 1,
+      },
+    }
+  }).catch((err) => {
+    console.log(`Error updating player ${player1Id} in database: `, err);
+  });
+  prisma.users.update({
+    where: { userid: player2Id },
+    data: {
+      games: {
+        increment: 1,
+      },
+    }
+  }).catch((err) => {
+    console.log(`Error updating player ${player2Id} in database: `, err);
+  });
+
+  return true;
+}
+
+
 
 io.on("connection", (socket: TypedSocket) => {
   console.log(`New WebSocket connection: ${socket.id}`);
@@ -159,7 +301,7 @@ io.on("connection", (socket: TypedSocket) => {
     console.error("Invalid token:", err);
   }
 
-  if(!token_info) {
+  if (!token_info) {
     console.error("Token info is undefined");
     socket.emit("connection_error", "Token info is null");
     socket.disconnect();
@@ -223,11 +365,11 @@ io.on("connection", (socket: TypedSocket) => {
 
   // Add to queue
   socket.on("queue", (gameConfig: GameConfig) => {
-    if(!gameConfig || !gameConfig.gameType || !gameConfig.timeControl) {
+    if (!gameConfig || !gameConfig.gameType || !gameConfig.timeControl) {
       socket.emit("queue_error", "Game config is not formatted correctly");
       return;
     }
-    console.log(`User ${userId} added to queue for game ${gameConfig}`);
+    console.log(`User ${userId} requested game ${JSON.stringify(gameConfig)}`);
     const queueList = queue.get(gameConfig);
     if (!queueList) {
       socket.emit("queue_error", "Game is not supported");
@@ -235,13 +377,26 @@ io.on("connection", (socket: TypedSocket) => {
     }
     // Check if the user is already in the queue
     if (wsState.currentQueue) {
-      socket.emit("queue_error", `User is already in queue for ${wsState.currentQueue}`);
-      return;
+      // remove the user from the current queue
+      const currentQueueList = queue.get(wsState.currentQueue);
+      if (currentQueueList) {
+        const index = currentQueueList.indexOf(wsKey);
+        if (index !== -1) {
+          currentQueueList.splice(index, 1);
+        }
+        wsState.currentQueue = null;
+      }
     }
     // Check if the user is already in a game
     if (wsState.gameCode) {
-      socket.emit("queue_error", "User is already in a game");
-      return;
+      if (!games.has(wsState.gameCode)) {
+        // clear the game code if it doesn't exist (shouldn't happen)
+        console.log(`User ${userId} is in a game ${wsState.gameCode} but the game doesn't exist`);
+        wsState.gameCode = null;
+      } else {
+        socket.emit("queue_error", "User is already in a game");
+        return;
+      }
     }
     // Add the user to the queue
     queueList.push(wsKey);
@@ -262,7 +417,7 @@ io.on("connection", (socket: TypedSocket) => {
       return;
     }
     const inGame = wsState.gameCode === gameCode;
-    if(!inGame) {
+    if (!inGame) {
       socket.emit("game_info_error", "User is not in the game");
       return;
     }
@@ -276,48 +431,80 @@ io.on("connection", (socket: TypedSocket) => {
     console.log(`User ${userId} made a move in game ${gameCode}:`, move);
     const gameData = games.get(gameCode);
     if (!gameData) {
+      console.log(`Game not found for user ${userId}`);
       socket.emit("game_move_error", "Game not found");
       return;
     }
     const inGame = wsState.gameCode === gameCode;
-    if(!inGame) {
+    if (!inGame) {
+      console.log(`User ${userId} is not in the game`);
       socket.emit("game_move_error", "User is not in the game");
       return;
     }
+    // check if it's the user's turn
+    const playerIndex = gameData.players.findIndex((player) => player.userId === userId);
+    if (playerIndex === -1) {
+      console.log(`User ${userId} is not in the game`);
+      socket.emit("game_move_error", "User is not in the game");
+      return;
+    }
+    if (gameData.playerTurn !== playerIndex) {
+      console.log(`It's not user ${userId}'s turn`);
+      socket.emit("game_move_error", "It's not your turn");
+      return;
+    }
+    // Check if the game is over
+    if (gameData.winner !== null) {
+      console.log(`Game is already over!`);
+      socket.emit("game_move_error", "Game is over");
+      return;
+    }
+
+    synchronizeGameTime(gameData);
+
+
+    // Check if the move was made in time
+    if (gameData.playerTimes[gameData.playerTurn] <= 0) {
+      console.log(`User ${userId} took too long to make a move!`);
+      socket.emit("game_move_error", "Time's up!");
+      return;
+    }
+
     // Apply the move to the game state
     const newGameState = gameData.gameState.clone();
     if (!newGameState.applyMove(move)) {
+      console.log(`User made an invalid move:`, move);
       socket.emit("game_move_error", "Invalid move");
       return;
     }
+
+    console.log(`Move applied:`, newGameState);
     // Update the game state
     gameData.gameState = newGameState;
+    gameData.playerTurn = 1 - gameData.playerTurn; // Switch turns
+    synchronizeGameTime(gameData);
+
+    if (shouldGameEnd(gameData)) {
+      endGameRoom(gameCode);
+      return;
+    }
+
+    // update the game timout
+    createGameTimeout(gameData);
 
     // Find the connection for both players
     const player1Key = `ws:${gameData.players[0].userId}`;
     const player2Key = `ws:${gameData.players[1].userId}`;
     const player1State = connections.get(player1Key);
     const player2State = connections.get(player2Key);
-    
-    // Check if the game is over
-    if (gameData.gameState.isGameOver()) {
-      gameData.winner = gameData.gameState.turn ? 1 : 0;
-      console.log(`Game over! Player ${gameData.winner} wins!`);
-      if (player1State) {
-        player1State.gameCode = null;
-      }
-      if (player2State) {
-        player2State.gameCode = null;
-      }
-      // Remove the game from the map
-      games.delete(gameCode);
-    }
-    
+
+
     // Emit the updated game state to both players
     const player1Socket = player1State?.socketId ? io.sockets.sockets.get(player1State.socketId) : null;
     const player2Socket = player2State?.socketId ? io.sockets.sockets.get(player2State.socketId) : null;
-    player1Socket?.emit("game_info", flipGamePerspective(gameData, false));
-    player2Socket?.emit("game_info", flipGamePerspective(gameData, true));
+    const publicGameData = makePublicGame(gameData);
+    player1Socket?.emit("game_info", flipGamePerspective(publicGameData, false));
+    player2Socket?.emit("game_info", flipGamePerspective(publicGameData, true));
   });
 
 

@@ -1,6 +1,6 @@
 'use client';
 import { useRouter, useParams } from "next/navigation";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { GameContext } from "../../game-context";
 import { NimState } from "@/games/nim";
 import { PublicGame } from "@/types/websocket";
@@ -8,6 +8,9 @@ import { SocketContext } from "../../socket-context";
 import { NimMove } from "@/types/nim";
 import NimRenderer from "@/app/games/nim/nim-renderer";
 import { Crown } from "lucide-react";
+import { formatDuration } from "@/types/games";
+
+const updatePeriod = 500;
 
 export default function NimLive() {
     const router = useRouter();
@@ -21,6 +24,31 @@ export default function NimLive() {
     }
     const gameCode = gameCodeP as string;
     const [gameState, setGameState] = useState<NimState | null>(null);
+    const [displayTimers, setDisplayTimers] = useState<[number, number]>([0, 0]);
+    const [timerInterval, setTimerInterval] = useState<NodeJS.Timeout | null>(null);
+
+    // update timers
+    useEffect(() => {
+        if (timerInterval) {
+            clearInterval(timerInterval);
+        }
+        setTimerInterval(setInterval(() => {
+            setDisplayTimers((prevTimers) => {
+                if (!gameData) return prevTimers;
+                // If the game is over, stop updating the timers
+                if (gameData.winner !== null) return prevTimers;
+                let newTimers: [number, number] = [...gameData.playerTimes];
+                let currentPlayer = gameState?.turn ? 0 : 1;
+                newTimers[currentPlayer] = Math.max(0, newTimers[currentPlayer] - (Date.now() - gameData.lastUpdated));
+                return newTimers;
+            });
+        }, updatePeriod));
+        return () => {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+        }
+    }, [gameState, gameData]);
 
     // load initial game data
     useEffect(() => {
@@ -29,6 +57,7 @@ export default function NimLive() {
             setGameData(data);
             let tempGameState = new NimState(data.gameState.piles, data.gameState.turn);
             setGameState(tempGameState);
+            setDisplayTimers(data.playerTimes);
         });
         socket.emit("request_game_info", gameCode);
         return () => {
@@ -56,18 +85,20 @@ export default function NimLive() {
             let name = <div className="max-w-[250px] overflow-hidden text-ellipsis">
                 {player.name}
             </div>;
+            let timer = displayTimers[index];
+            let timerFormatted = formatDuration(timer);
             let crown = gameData.winner !== null && gameData.winner == index ? <Crown className="ml-2 text-yellow-500" fill="currentColor"/> : null;
             let timerColor = gameState.turn == (index === 0) ? "bg-white" : "bg-gray-300";
-            let timer = <div className={`w-12 h-12 rounded-sm border flex items-center justify-center ${timerColor} justify-self-${index === 0 ? "end" : "start"}`}>
-                5:00
+            let timerDisplay = <div className={`w-12 h-12 rounded-sm border flex items-center justify-center ${timerColor} justify-self-${index === 0 ? "end" : "start"}`}>
+                {timerFormatted}
             </div>;
             return (
                 <div key={index} className={`flex flex-row items-center justify-between border p-2 rounded-lg`}>
                     <div className="flex flex-row items-center">
-                        {index == 0 ? [pfp, name, crown] : [timer]}
+                        {index == 0 ? [pfp, name, crown] : [timerDisplay]}
                     </div>
                     <div className="flex flex-row items-center">
-                        {index == 0 ? [timer] : [crown, name, pfp]}
+                        {index == 0 ? [timerDisplay] : [crown, name, pfp]}
                     </div>
                 </div>
             )
