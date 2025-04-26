@@ -146,6 +146,7 @@ function makeGameRoom(game: GameConfig, player1: string, player2: string) {
     playerTimes: [timeMs, timeMs] as [number, number],
     lastUpdated: Date.now(),
   };
+  gameData.gameState.turn = firstPlayer == 0;
   createGameTimeout(gameData);
   console.log(`Game data:`, gameData);
 
@@ -256,26 +257,30 @@ function endGameRoom(gameCode: string): boolean {
   // update database
   const player1Id = gameData.players[0].userId;
   const player2Id = gameData.players[1].userId;
-  prisma.users.update({
-    where: { userid: player1Id },
-    data: {
-      games: {
-        increment: 1,
-      },
-    }
-  }).catch((err) => {
-    console.log(`Error updating player ${player1Id} in database: `, err);
-  });
-  prisma.users.update({
-    where: { userid: player2Id },
-    data: {
-      games: {
-        increment: 1,
-      },
-    }
-  }).catch((err) => {
-    console.log(`Error updating player ${player2Id} in database: `, err);
-  });
+  const gameConfig = gameData.gameConfig;
+  const gameCountToIncrement = `${gameConfig.gameType}_${gameConfig.timeControl}_games`;
+  const winCountToIncrement = `${gameConfig.gameType}_${gameConfig.timeControl}_wins`;
+  for (let playerId of [player1Id, player2Id]) {
+    let playerIndex = playerId === player1Id ? 0 : 1;
+    prisma.users.update({
+      where: { userid: playerId },
+      data: {
+        games: {
+          increment: 1,
+        },
+        [gameCountToIncrement]: {
+          increment: 1,
+        },
+        ...(playerIndex === gameData.winner ? {
+          [winCountToIncrement]: {
+            increment: 1,
+          },
+        } : {}),
+      }
+    }).catch((err) => {
+      console.log(`Error updating player ${playerId} in database: `, err);
+    });
+  }
 
   return true;
 }
@@ -345,7 +350,8 @@ io.on("connection", (socket: TypedSocket) => {
       console.log(`Game not found for user ${userId} even though they are in a game`);
       return;
     }
-    const adjustedGameData = flipGamePerspective(gameData, gameData.players[0].userId !== userId);
+    const publicGameData = makePublicGame(gameData);
+    const adjustedGameData = flipGamePerspective(publicGameData, gameData.players[0].userId !== userId);
     socket.emit("game_info", adjustedGameData);
     console.log(`Game data sent to user ${userId}:`, adjustedGameData);
   }
@@ -421,7 +427,8 @@ io.on("connection", (socket: TypedSocket) => {
       socket.emit("game_info_error", "User is not in the game");
       return;
     }
-    const adjustedGameData = flipGamePerspective(gameData, gameData.players[0].userId !== userId);
+    const publicGameData = makePublicGame(gameData);
+    const adjustedGameData = flipGamePerspective(publicGameData, gameData.players[0].userId !== userId);
     socket.emit("game_info", adjustedGameData);
     console.log(`Game data sent to user ${userId}:`, adjustedGameData);
   });

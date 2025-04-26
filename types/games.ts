@@ -38,6 +38,21 @@ export function timeControlToMilliseconds(timeControl: TimeControlEnum): number 
     }
 }
 
+export function displayGameType(type: GameTypeEnum): string {
+    switch (type) {
+        case GameTypeEnum.NIM:
+            return "Nim";
+        case GameTypeEnum.MARBLES:
+            return "Marbles";
+        case GameTypeEnum.LONE_KNIGHT:
+            return "Lone Knight";
+        case GameTypeEnum.MULTI_KNIGHT:
+            return "Multi Knight";
+        default:
+            throw new Error("Invalid game type");
+    }
+}
+
 export function formatDuration(ms: number): string {
     const minutes = Math.floor(ms / 60000); // Get total minutes
     const seconds = Math.floor((ms % 60000) / 1000); // Get remaining seconds

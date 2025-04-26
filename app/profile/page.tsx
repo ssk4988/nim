@@ -4,6 +4,9 @@ import { use, useEffect, useState } from "react";
 import { User } from "@/types/user";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { gamesToSetup, timeControlsToSetup } from "@/websocket/game-util";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { displayGameType } from "@/types/games";
 
 export default function Profile() {
     const [isLoading, setIsLoading] = useState(true);
@@ -59,6 +62,29 @@ export default function Profile() {
     // format data as Month Year
     const options: Intl.DateTimeFormatOptions = { month: "long", year: "numeric" };
     const formattedDate = createdat.toLocaleDateString("en-US", options);
+
+    const gamesInfo = gamesToSetup.map((game) => {
+        return timeControlsToSetup.map((timeControl) => {
+            let gameConfigString = `${game}_${timeControl}`;
+            let gameWinString = `${game}_${timeControl}_wins`;
+            let gameCountString = `${game}_${timeControl}_games`;
+            if (!(gameCountString in profile) || !(gameWinString in profile)) return null;
+            const gameCount = profile[gameCountString as keyof typeof profile] as number;
+            const gameWins = profile[gameWinString as keyof typeof profile] as number;
+            if (gameCount === 0) return null;
+            return <Card key={gameConfigString}>
+                <CardHeader>
+                    <CardTitle>{displayGameType(game)} {timeControl}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p>Games Played: {gameCount}</p>
+                    <p>Wins: {gameWins}</p>
+                    <p>Win Rate: {(gameWins / gameCount * 100).toFixed(2)}%</p>
+                </CardContent>
+            </Card>
+        });
+    }).flat().filter((game) => game !== null);
+
     return (
         <div className="container mx-auto px-4 py-12">
             <div className="mb-8 flex flex-col items-center justify-between gap-4 sm:flex-row">
@@ -72,7 +98,13 @@ export default function Profile() {
                 </Button>
             </div>
             <div className="container mx-auto mt-8">
-                <h2>Games Played: {profile.games}</h2>
+                <h2>Total Games Played: {profile.games}</h2>
+            </div>
+            <div className="container mx-auto mt-8">
+                <h2 className="text-2xl font-bold">Game Statistics</h2>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    {gamesInfo}
+                </div>
             </div>
         </div>
     )

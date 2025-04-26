@@ -9,13 +9,15 @@ datasource db {
 }
 
 model users {
-  userid       Int      @id @default(autoincrement())
-  name         String   @db.VarChar(100)
-  email        String   @unique @db.VarChar(255)
-  createdat    DateTime @default(now()) @db.Timestamp(6)
-  games        Int      @default(0)
-  nim_5m_games Int      @default(0)
-  nim_5m_wins  Int      @default(0)
-  nim_1m_games Int      @default(0)
-  nim_1m_wins  Int      @default(0)
+  userid        Int      @id @default(autoincrement())
+  name          String   @db.VarChar(100)
+  email         String   @unique @db.VarChar(255)
+  createdat     DateTime @default(now()) @db.Timestamp(6)
+  games         Int      @default(0)
+  nim_5m_games  Int      @default(0)
+  nim_5m_wins   Int      @default(0)
+  nim_1m_games  Int      @default(0)
+  nim_1m_wins   Int      @default(0)
+  nim_15s_games Int      @default(0)
+  nim_15s_wins  Int      @default(0)
 }
