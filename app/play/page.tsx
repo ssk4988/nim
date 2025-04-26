@@ -8,6 +8,9 @@ import { GameContext } from "./game-context";
 import { PublicGame } from "@/types/websocket";
 import { useRouter } from "next/navigation";
 import { GameTypeEnum, TimeControlEnum } from "@/types/games";
+import { gamesToSetup, timeControlsToSetup } from "@/websocket/game-util";
+import GameTile from "../games/game-tile";
+import { gameInfo } from "../games/page";
 
 export default function PlayPage() {
     const { socket, setSocket } = useContext(SocketContext);
@@ -72,8 +75,25 @@ export default function PlayPage() {
         };
     }, [socket]);
 
+    let gameTiles = gamesToSetup.map((game) => {
+        let timeControls = timeControlsToSetup.map((timeControl) => <Button key={timeControl} onClick={() => {
+            socket?.emit("queue", {
+                gameType: game,
+                timeControl: timeControl
+            });
+        }}>{timeControl}</Button>
+        );
+        let infoForGame = gameInfo.find((info) => info.gameType === game)!;
+        return <GameTile key={game} {...infoForGame}>
+            <div className="flex flex-row">
+                {timeControls}
+            </div>
+        </GameTile>;
+    });
+
     return (
-        <div className="grid grid-cols-4 sm:grid-cols-4 gap-4">
+        <div className="flex flex-col">
+
             <div className="col-span-4">
                 <h1>WebSocket Client</h1>
                 <p>
@@ -107,6 +127,17 @@ export default function PlayPage() {
             }}>
                 Add to Queue: Nim 5m
             </Button>}
+            {socket && <Button onClick={() => {
+                socket.emit("queue", {
+                    gameType: GameTypeEnum.NIM,
+                    timeControl: TimeControlEnum.MIN1
+                });
+            }}>
+                Add to Queue: Nim 1m
+            </Button>}
+            <div className="grid grid-cols-4 sm:grid-cols-4 gap-4">
+                {gameTiles}
+            </div>
         </div>
     );
 }

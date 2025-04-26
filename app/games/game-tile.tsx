@@ -4,22 +4,21 @@ import Link from "next/link";
 
 interface GameTileProps {
     game: string;
-    path: string;
-    description: string;
+    description?: string;
     img: string;
+    children?: React.ReactNode;
 };
 
-export default function GameTile({ game, path, description, img }: GameTileProps) {
+export default function GameTile({ game, description, img, children }: GameTileProps) {
     const imgPath = `/images/${img}.png`;
-    return <Link href={path}>
-        <Card className="flex flex-col items-center w-full">
-            <CardHeader className="flex flex-col items-center">
-                <CardTitle>{game}</CardTitle>
-                <CardDescription>{description}</CardDescription>
-            </CardHeader>
-            <div className="flex items-center justify-center w-16 h-16 m-4">
-                <img src={imgPath} alt="Game Icon" className="w-16 h-16" />
-            </div>
-        </Card>
-    </Link>
+    return <Card className="flex flex-col items-center w-full">
+        <CardHeader className="flex flex-col items-center">
+            <CardTitle>{game}</CardTitle>
+            {description && <CardDescription>{description}</CardDescription>}
+        </CardHeader>
+        <div className="flex items-center justify-center w-16 h-16 m-4">
+            <img src={imgPath} alt="Game Icon" className="w-16 h-16" />
+        </div>
+        {children}
+    </Card>
 }
