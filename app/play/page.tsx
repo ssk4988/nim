@@ -1,26 +1,38 @@
 'use client';
 import { useContext, useEffect, useState } from "react";
-import { io } from "socket.io-client";
 import { Button } from "@/components/ui/button";
 import { useSession } from "next-auth/react";
 import { SocketContext } from "./socket-context";
 import { GameContext } from "./game-context";
 import { PublicGame } from "@/types/websocket";
 import { useRouter } from "next/navigation";
-import { GameTypeEnum, TimeControlEnum } from "@/types/games";
 import { gamesToSetup, timeControlsToSetup } from "@/websocket/game-util";
 import GameTile from "../games/game-tile";
 import { gameInfo } from "../games/page";
+import { useSnackbar } from "@/components/snackbar";
 
 export default function PlayPage() {
     const { socket, setSocket } = useContext(SocketContext);
     const { gameData, setGameData } = useContext(GameContext);
+    const { addSnackbarMessage } = useSnackbar();
     const [wsError, setWsError] = useState<string | null>(null);
-    const [messages, setMessages] = useState<string[]>([]);
     const router = useRouter();
     const { data: session } = useSession();
     console.log("Session data: ", session);
     const token = session?.user?.token;
+
+    // Send an error message if user is not logged in
+    useEffect(() => {
+        if (!session) {
+            const timeout = setTimeout(() => {
+                console.log("Session not found");
+                addSnackbarMessage({ text: "You must be logged in to play live games", error: true, duration: Infinity });
+            }, 2000);
+            return () => {
+                clearTimeout(timeout);
+            };
+        }
+    }, [session]);
 
     useEffect(() => {
         if (!socket) {
@@ -31,29 +43,32 @@ export default function PlayPage() {
 
         // Listen for messages
         socket.on("message", (data: string) => {
-            setMessages((prev) => [...prev, data]);
+            addSnackbarMessage({ text: data });
         });
 
         // Handle connection errors
         socket.on("connection_error", (error) => {
             console.error("Error:", error);
             setWsError(error);
+            addSnackbarMessage({ text: "Connection error: " + error, error: true, duration: Infinity });
         });
         // handle queueing errors
         socket.on("queue_error", (error) => {
             console.error("Queue Error:", error);
             setWsError(error);
+            addSnackbarMessage({ text: "Queue error: " + error, error: true });
         });
         // Handle disconnection
         socket.on("disconnect", (error) => {
             console.error("Disconnect:", error);
+            addSnackbarMessage({ text: "Disconnected: " + error, error: true, duration: Infinity });
             setSocket(null);
         });
 
         // handle queue success - event for successfully adding player to queue
         socket.on("queue_success", (data: string) => {
             console.log("Queue Success:", data);
-            setMessages((prev) => [...prev, data]);
+            addSnackbarMessage({ text: "Queue success: " + data });
         });
 
         socket.on("game_info", (data: PublicGame<any>) => {
@@ -104,37 +119,6 @@ export default function PlayPage() {
                 <h2>WebSocket Error:</h2>
                 {wsError ? <p className="text-red-500">{wsError}</p> : <p className="text-green-500">No errors</p>}
             </div>
-            <div className="col-span-4">
-                <h2>Messages from server:</h2>
-                <ul>
-                    {messages.map((msg, index) => (
-                        <li key={index}>{msg}</li>
-                    ))}
-                </ul>
-            </div>
-            <Button onClick={() => {
-                if (socket) {
-                    socket.emit("message", "Hello from client");
-                }
-            }}>
-                Send Message
-            </Button>
-            {socket && <Button onClick={() => {
-                socket.emit("queue", {
-                    gameType: GameTypeEnum.NIM,
-                    timeControl: TimeControlEnum.MIN5
-                });
-            }}>
-                Add to Queue: Nim 5m
-            </Button>}
-            {socket && <Button onClick={() => {
-                socket.emit("queue", {
-                    gameType: GameTypeEnum.NIM,
-                    timeControl: TimeControlEnum.MIN1
-                });
-            }}>
-                Add to Queue: Nim 1m
-            </Button>}
             <div className="grid grid-cols-4 sm:grid-cols-4 gap-4">
                 {gameTiles}
             </div>

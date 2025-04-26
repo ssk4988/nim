@@ -4,6 +4,7 @@ import { SessionProvider } from "./session-provider";
 import { ThemeProvider } from "@/components/theme-provider"
 import "./globals.css";
 import { SiteHeader } from "@/components/site-header";
+import { SnackbarProvider } from "@/components/snackbar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,10 +38,12 @@ export default function RootLayout({
           className={inter.className}
         >
           <ThemeProvider>
-            <div className="relative flex min-h-screen flex-col">
-              <SiteHeader />
-              {children}
-            </div>
+            <SnackbarProvider>
+              <div className="relative flex min-h-screen flex-col">
+                <SiteHeader />
+                {children}
+              </div>
+            </SnackbarProvider>
           </ThemeProvider>
         </body>
       </SessionProvider>

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { gamesToSetup, timeControlsToSetup } from "@/websocket/game-util";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { displayGameType } from "@/types/games";
+import { displayGameType, displayTimeControl } from "@/types/games";
 
 export default function Profile() {
     const [isLoading, setIsLoading] = useState(true);
@@ -74,7 +74,7 @@ export default function Profile() {
             if (gameCount === 0) return null;
             return <Card key={gameConfigString}>
                 <CardHeader>
-                    <CardTitle>{displayGameType(game)} {timeControl}</CardTitle>
+                    <CardTitle>{displayGameType(game)} {displayTimeControl(timeControl)}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <p>Games Played: {gameCount}</p>
