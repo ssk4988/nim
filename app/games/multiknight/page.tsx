@@ -42,31 +42,6 @@ export default function MultiKnightPlayer() {
         console.log("Grundy Value: ", board.grundyValue());
     }, [board]);
 
-    // mark that a game has been played
-    useEffect(() => {
-        if (!session) return;
-        if (!pickedSide) return;
-        if (!board.isGameOver()) return;
-        console.log("Game over, marking game as played");
-        const markGamePlayed = async () => {
-            const response = await fetch("/api/games/track", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            });
-            if (response.ok) {
-                const data = await response.json();
-                console.log("Game marked as played: ", data);
-            } else {
-                console.error("Failed to mark game as played");
-                const errorData = await response.json();
-                console.error("Error: ", errorData);
-            }
-        };
-        markGamePlayed();
-    }, [session, board, pickedSide]);
-
     let isPlayerTurn = board.turn && pickedSide;
     let moveSpots: { row: number, col: number, direction: number }[] = [];
     if (isPlayerTurn && selectedCell != null) {

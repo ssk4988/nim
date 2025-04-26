@@ -20,22 +20,20 @@ export function makePublicGame<GameState extends GameInterface<any, any>>(game: 
     playerTimes: game.playerTimes,
     lastUpdated: game.lastUpdated,
   };
-  returnobject.gameState.turn = game.playerTurn === game.firstPlayer;
   return returnobject;
 }
 
 // Switch players if needed
 export function flipGamePerspective<GameState extends GameInterface<any, any>>(game: PublicGame<GameState>, flip: boolean) {
+  if(!flip) return game;
   let adjustedGame: PublicGame<GameState> = { ...game, gameState: game.gameState.clone() };
-  if (flip) {
-    adjustedGame.players = [game.players[1], game.players[0]];
-    adjustedGame.gameState.turn = !game.gameState.turn;
-    adjustedGame.firstPlayer = game.firstPlayer === 0 ? 1 : 0;
-    if (game.winner !== null) {
-      adjustedGame.winner = game.winner === 0 ? 1 : 0;
-    }
-    adjustedGame.playerTimes = [game.playerTimes[1], game.playerTimes[0]];
+  adjustedGame.players = [game.players[1], game.players[0]];
+  adjustedGame.gameState.turn = !game.gameState.turn;
+  adjustedGame.firstPlayer = game.firstPlayer === 0 ? 1 : 0;
+  if (game.winner !== null) {
+    adjustedGame.winner = game.winner === 0 ? 1 : 0;
   }
+  adjustedGame.playerTimes = [game.playerTimes[1], game.playerTimes[0]];
   return adjustedGame;
 }
 
@@ -76,7 +74,7 @@ export function shouldGameEnd(game: Game<GameInterface<any, any>>): boolean {
   }
   return false;
 }
-  
+
 export const gamesToSetup = [GameTypeEnum.NIM];
 export const timeControlsToSetup = [
   TimeControlEnum.SEC15,

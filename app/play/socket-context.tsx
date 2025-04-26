@@ -42,12 +42,9 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         setSocket(socketInstance);
         // cleanup function to disconnect the socket when the component unmounts
         return () => {
-            if (socket) {
-                socket.disconnect();
-                console.log("Socket disconnected");
-            }
+            console.log("Socket disconnected");
+            socketInstance.disconnect();
             clearTimeout(connectionTimeout);
-            console.log("Connection timeout cleared");
             setSocket(null);
         };
     }, [token]);
