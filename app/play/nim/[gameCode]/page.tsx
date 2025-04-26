@@ -70,12 +70,6 @@ export default function NimLive() {
     if (!loaded) {
         return <div>Loading...</div>
     }
-    let statusMessage = "";
-    if (gameState.isGameOver()) {
-        statusMessage = gameState.turn ? "You lose!" : "You win!";
-    } else {
-        statusMessage = gameState.turn ? "It's your turn!" : "It's the other player's turn...";
-    }
 
     let playerTiles = <div className="grid grid-cols-2 gap-4 w-5/6">
         {gameData.players.map((player, index) => {

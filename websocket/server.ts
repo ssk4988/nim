@@ -407,7 +407,7 @@ io.on("connection", (socket: TypedSocket) => {
     // Add the user to the queue
     queueList.push(wsKey);
     wsState.currentQueue = gameConfig;
-    socket.emit("queue_success", `User ${userId} added to queue for game ${gameConfig}`);
+    socket.emit("queue_success", `User ${userId} added to queue for game ${JSON.stringify(gameConfig)}`);
     console.log(`Queue for game ${gameConfig}:`, queueList);
 
     // pair players from the queue
