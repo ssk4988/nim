@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { knightValidMoves, knightDirections } from "@/games/knight";
 import TurnPrompt from "../turn-prompt";
 import { computerThinkingTime } from "@/lib/constants";
+import LoneKnightRenderer from "./loneknight-renderer";
 
 export default function LoneKnightPlayer() {
     const { data: session } = useSession();
@@ -39,45 +40,14 @@ export default function LoneKnightPlayer() {
         console.log("Grundy Value: ", board.grundyValue());
     }, [board]);
 
-    let isPlayerTurn = board.turn && pickedSide;
-    let moveSpots: { row: number, col: number, direction: number }[] = [];
-    if (isPlayerTurn) {
-        moveSpots = knightValidMoves(board.knightPosition.row, board.knightPosition.col).map(move => {
-            return {
-                row: board.knightPosition.row + knightDirections[move.direction].row,
-                col: board.knightPosition.col + knightDirections[move.direction].col,
-                direction: move.direction
-            }
-        });
-    }
-    let rows = [];
-    for (let i = 0; i < LoneKnightState.boardHeight; i++) {
-        let row = [];
-        for (let j = 0; j < LoneKnightState.boardWidth; j++) {
-            let isKnight = i === board.knightPosition.row && j === board.knightPosition.col;
-            let className = "w-8 h-8 border flex items-center justify-center";
-            let tileColor = 'bg-gray-200';
-            let cell = null;
-            if (isKnight) {
-                cell = "♞";
-                tileColor = "bg-blue-500";
-            } else if (moveSpots.some(spot => spot.row === i && spot.col === j)) {
-                let direction = moveSpots.find(spot => spot.row === i && spot.col === j)!.direction;
-                cell = <Button onClick={() => {
-                    let newBoard = board.clone();
-                    newBoard.applyMove({ direction });
-                    setBoard(newBoard);
-                }}>•</Button>;
-                tileColor = "bg-green-200";
-            }
-            className = cn(className, tileColor);
-            row.push(<div key={`${i}-${j}`} className={className}>{cell}</div>);
+    let loneKnightRenderer = <LoneKnightRenderer gameState={board} submitter={(move) => {
+        const newBoard = board.clone();
+        if (!newBoard.applyMove(move)) {
+            console.log("Invalid move: ", move);
         }
-        rows.push(<div key={i} className="flex">{row}</div>);
-    }
-    let grid = <div className="flex flex-col">
-        {rows}
-    </div>;
+        setBoard(newBoard);
+    }} />
+
     let statusMessage = "";
     if (!pickedSide) {
         statusMessage = "Would you like to play first or second?";
@@ -145,7 +115,7 @@ export default function LoneKnightPlayer() {
             <div className="text-lg">{statusMessage}</div>
             {!pickedSide && turnPrompt}
             <div className="flex flex-row items-end justify-center gap-9 mt-8 min-h-[200px]">
-                {grid}
+                {loneKnightRenderer}
             </div>
             {sidebar}
         </div>

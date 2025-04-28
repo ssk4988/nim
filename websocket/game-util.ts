@@ -75,8 +75,8 @@ export function shouldGameEnd(game: Game<GameInterface<any, any>>): boolean {
   return false;
 }
 
-export const gamesToSetup = [GameTypeEnum.NIM, GameTypeEnum.MARBLES];
-export const timeControlsToSetup = [
+export const liveGameTypes = [GameTypeEnum.NIM, GameTypeEnum.MARBLES, GameTypeEnum.MULTI_KNIGHT];
+export const liveTimeControlTypes = [
   TimeControlEnum.SEC15,
   TimeControlEnum.MIN1,
   TimeControlEnum.MIN5,

@@ -1,16 +1,13 @@
 'use client';
-import { Button } from "@/components/ui/button";
 import { MultiKnightState } from "@/games/multiknight";
 import { useSession } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
 import { GameMenu } from "../game-menu";
 import { GameSidebar } from "../game-sidebar";
-import { cn } from "@/lib/utils";
-import { Badge } from "@radix-ui/themes";
-import { knightDirections, knightValidMoves } from "@/games/knight";
 import { Cell } from "@/types/knight";
 import TurnPrompt from "../turn-prompt";
 import { computerThinkingTime } from "@/lib/constants";
+import MultiKnightRenderer from "./multiknight-renderer";
 
 export default function MultiKnightPlayer() {
     const { data: session } = useSession();
@@ -43,68 +40,15 @@ export default function MultiKnightPlayer() {
         console.log("Grundy Value: ", board.grundyValue());
     }, [board]);
 
-    let isPlayerTurn = board.turn && pickedSide;
-    let moveSpots: { row: number, col: number, direction: number }[] = [];
-    if (isPlayerTurn && selectedCell != null) {
-        let { row, col } = selectedCell;
-        moveSpots = knightValidMoves(row, col).map(move => {
-            return {
-                row: row + knightDirections[move.direction].row,
-                col: col + knightDirections[move.direction].col,
-                direction: move.direction
-            }
-        });
-    }
-    let rows = [];
-    for (let i = 0; i < MultiKnightState.boardHeight; i++) {
-        let row = [];
-        for (let j = 0; j < MultiKnightState.boardWidth; j++) {
-            let hasKnight = board.grid[i][j] > 0;
-            let isMoveSpot = moveSpots.some(spot => spot.row === i && spot.col === j);
-            let className = "w-8 h-8 border flex items-center justify-center";
-            let tileColor = 'bg-gray-200';
-            let cell = null;
-            let clickAction = () => { };
-            if (isMoveSpot) {
-                let direction = moveSpots.find(spot => spot.row === i && spot.col === j)!.direction;
-                clickAction = () => {
-                    let newBoard = board.clone();
-                    newBoard.applyMove({ row: selectedCell!.row, col: selectedCell!.col, direction });
-                    setBoard(newBoard);
-                    setSelectedCell(null);
-                }
-                tileColor = "bg-green-200";
-            } else if (hasKnight) {
-                clickAction = () => {
-                    if (isPlayerTurn) {
-                        setSelectedCell(selectedCell => {
-                            if (selectedCell?.row === i && selectedCell?.col === j) return null;
-                            return { row: i, col: j };
-                        });
-                    }
-                }
-                if (selectedCell?.row === i && selectedCell?.col === j) {
-                    tileColor = "bg-blue-300";
-                } else {
-                    tileColor = "bg-blue-500";
-                }
-            }
-            if (hasKnight) {
-                cell = <Button onClick={clickAction}>
-                    ♞
-                    <Badge className="text-xs">{board.grid[i][j]}</Badge>
-                </Button>
-            } else if (moveSpots.some(spot => spot.row === i && spot.col === j)) {
-                cell = <Button onClick={clickAction}>•</Button>;
-            }
-            className = cn(className, tileColor);
-            row.push(<div key={`${i}-${j}`} className={className}>{cell}</div>);
+    let multiKnightRenderer = <MultiKnightRenderer gameState={board} selectedCell={selectedCell} submitter={(move) => {
+        const newBoard = board.clone();
+        if (!newBoard.applyMove(move)) {
+            console.log("Invalid move: ", move);
         }
-        rows.push(<div key={i} className="flex">{row}</div>);
-    }
-    let grid = <div className="flex flex-col">
-        {rows}
-    </div>;
+        setBoard(newBoard);
+        setSelectedCell(null);
+    }} setSelectedCell={setSelectedCell} />
+
     let statusMessage = "";
     if (!pickedSide) {
         statusMessage = "Would you like to play first or second?";
@@ -173,7 +117,7 @@ export default function MultiKnightPlayer() {
             <div className="text-lg">{statusMessage}</div>
             {!pickedSide && turnPrompt}
             <div className="flex flex-row items-end justify-center gap-9 mt-8 min-h-[200px]">
-                {grid}
+                {multiKnightRenderer}
             </div>
             {sidebar}
         </div>

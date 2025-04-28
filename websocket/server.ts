@@ -6,7 +6,7 @@ import { TokenInfo } from "next-auth";
 import { TypedSocket, Game, WSState, PlayerData } from "../types/websocket";
 import { GameConfig, GameInterface, GameTypeEnum, TimeControlEnum, timeControlToMilliseconds } from "@/types/games";
 import { KeyMap } from "./key-map";
-import { flipGamePerspective, gameStateFactory, gamesToSetup, makePublicGame, shouldGameEnd, synchronizeGameTime, timeControlsToSetup } from "./game-util";
+import { flipGamePerspective, gameStateFactory, liveGameTypes, makePublicGame, shouldGameEnd, synchronizeGameTime, liveTimeControlTypes } from "./game-util";
 import { PrismaClient } from "@prisma/client";
 dotenv.config();
 
@@ -52,8 +52,8 @@ const connections: Map<string, WSState> = new Map();
 const queue: KeyMap<GameConfig, string[]> = new KeyMap();
 
 // Initialize the queue for each game type and time control
-for (const gameType of gamesToSetup) {
-  for (const timeControl of timeControlsToSetup) {
+for (const gameType of liveGameTypes) {
+  for (const timeControl of liveTimeControlTypes) {
     queue.set({ gameType: gameType, timeControl: timeControl }, []);
   }
 }

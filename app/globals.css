@@ -14,6 +14,13 @@
   --accent-foreground: #ffffff; /* Accent foreground color */
   --ring: #3b82f6; /* Focus ring color */
   --ring-offset-background: var(--background); /* Ring offset background */
+
+  --board-square: #f0f0f0; /* Board square color */
+  --board-square-hover: #e0e0e0; /* Board square hover color */
+  --board-square-piece: #545fef; /* Board square active color */
+  --board-square-piece-hover: #5c97f5; /* Board square active hover color */
+  --board-square-action: #3bf679; /* Board square action color */
+  --board-square-action-hover: #85fcac; /* Board square action hover color */
 }
 
 /* @theme inline {
@@ -132,6 +139,13 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-ring: var(--ring);
+
+  --color-board-square: var(--board-square);
+  --color-board-square-hover: var(--board-square-hover);
+  --color-board-square-piece: var(--board-square-piece);
+  --color-board-square-piece-hover: var(--board-square-piece-hover);
+  --color-board-square-action: var(--board-square-action);
+  --color-board-square-action-hover: var(--board-square-action-hover);
 }
 
 /* @media (prefers-color-scheme: dark) {
