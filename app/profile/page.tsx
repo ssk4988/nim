@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { gamesToSetup, timeControlsToSetup } from "@/websocket/game-util";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { displayGameType, displayTimeControl } from "@/types/games";
+import LoadingScreen from "@/components/ui/loading";
 
 export default function Profile() {
     const [isLoading, setIsLoading] = useState(true);
@@ -40,14 +41,7 @@ export default function Profile() {
     }, []);
 
     if (isLoading) {
-        return (
-            <div className="container mx-auto flex min-h-[calc(100vh-200px)] items-center justify-center px-4 py-12">
-                <div className="text-center">
-                    <div className="mb-4 h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
-                    <p>Loading profile...</p>
-                </div>
-            </div>
-        )
+        return <LoadingScreen text="Loading profile..." />;
     }
     if (!profile) {
         return (

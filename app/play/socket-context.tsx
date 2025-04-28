@@ -1,5 +1,6 @@
 'use client';
 
+import { useSnackbar } from "@/components/snackbar";
 import { ClientToServerEvents, ServerToClientEvents } from "@/types/websocket";
 import { useSession } from "next-auth/react";
 import React, { useEffect } from "react";
@@ -17,6 +18,7 @@ interface SocketContextType {
 export const SocketContext = createContext<SocketContextType>({socket: null, setSocket: () => {}});
 export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [socket, setSocket] = React.useState<TypedSocket | null>(null);
+    const { addSnackbarMessage } = useSnackbar();
     const { data: session } = useSession();
     const token = session?.user?.token;
 
@@ -37,6 +39,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         const connectionTimeout = setTimeout(() => {
             if (!socketInstance.connected) {
                 console.error("WebSocket connection failed.");
+                addSnackbarMessage({ text: "WebSocket connection failed.", error: true, duration: Infinity });
             }
         }, 3000);
         setSocket(socketInstance);
