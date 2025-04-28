@@ -1,17 +1,17 @@
 'use client';
 import { useRouter, useParams } from "next/navigation";
 import { useContext, useEffect, useState } from "react";
-import { NimState } from "@/games/nim";
+import { MarblesState } from "@/games/marbles";
 import { PublicGame } from "@/types/websocket";
 import { SocketContext } from "../../socket-context";
-import NimRenderer from "@/app/games/nim/nim-renderer";
+import MarblesRenderer from "@/app/games/marbles/marbles-renderer";
 import { useSnackbar } from "@/components/snackbar";
 import { timerUpdatePeriod } from "@/lib/constants";
 import PlayerTiles from "../../player-tiles";
 import LoadingScreen from "@/components/ui/loading";
 
 
-export default function NimLive() {
+export default function MarblesLive() {
     const router = useRouter();
     const params = useParams();
     const { socket } = useContext(SocketContext);
@@ -23,7 +23,7 @@ export default function NimLive() {
         return null;
     }
     const gameCode = gameCodeP as string;
-    const [gameState, setGameState] = useState<NimState | null>(null);
+    const [gameState, setGameState] = useState<MarblesState | null>(null);
     const [displayTimers, setDisplayTimers] = useState<[number, number]>([0, 0]);
     const [timerInterval, setTimerInterval] = useState<NodeJS.Timeout | null>(null);
 
@@ -56,7 +56,7 @@ export default function NimLive() {
             console.log("Game Info:", data);
             setGameData(data);
             // create game state using class constructor
-            let tempGameState = new NimState(data.gameState.piles, data.gameState.turn);
+            let tempGameState = new MarblesState(data.gameState.marbles, data.gameState.turn);
             setGameState(tempGameState);
             setDisplayTimers(data.playerTimes);
         });
@@ -78,7 +78,7 @@ export default function NimLive() {
 
     let playerTiles = <PlayerTiles players={gameData.players} timers={displayTimers} winner={gameData.winner} turn={gameState.turn} />;
     
-    let nimRenderer = <NimRenderer gameState={gameState} submitter={(move) => {
+    let marblesRenderer = <MarblesRenderer gameState={gameState} submitter={(move) => {
         // Update local game state
         const newGameState = gameState.clone();
         if (!newGameState.applyMove(move)) {
@@ -92,9 +92,9 @@ export default function NimLive() {
 
     return <div>
         <div className="container mx-auto flex flex-col items-center relative" style={{ height: "calc(99.9vh - var(--navbar-height))" }}>
-            <h1 className="text-2xl font-bold my-8">Nim Game</h1>
+            <h1 className="text-2xl font-bold my-8">Marbles Game</h1>
             {playerTiles}
-            {nimRenderer}
+            {marblesRenderer}
         </div>
     </div>
 }

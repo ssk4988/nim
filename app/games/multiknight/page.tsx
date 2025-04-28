@@ -10,6 +10,7 @@ import { Badge } from "@radix-ui/themes";
 import { knightDirections, knightValidMoves } from "@/games/knight";
 import { Cell } from "@/types/knight";
 import TurnPrompt from "../turn-prompt";
+import { computerThinkingTime } from "@/lib/constants";
 
 export default function MultiKnightPlayer() {
     const { data: session } = useSession();
@@ -32,7 +33,7 @@ export default function MultiKnightPlayer() {
                 console.log("Invalid computer move: ", move);
             }
             setBoard(newBoard);
-        }, 1000);
+        }, computerThinkingTime);
         computerRef.current = timer;
     }, [board, pickedSide]);
 

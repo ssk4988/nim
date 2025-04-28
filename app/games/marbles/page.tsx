@@ -6,6 +6,8 @@ import { useEffect, useRef, useState } from "react";
 import { GameMenu } from "../game-menu";
 import { GameSidebar } from "../game-sidebar";
 import TurnPrompt from "../turn-prompt";
+import MarblesRenderer from "./marbles-renderer";
+import { computerThinkingTime } from "@/lib/constants";
 
 export default function MarblesPlayer() {
     const { data: session } = useSession();
@@ -26,7 +28,7 @@ export default function MarblesPlayer() {
                 console.log("Invalid computer move: ", move);
             }
             setBoard(newBoard);
-        }, 1000);
+        }, computerThinkingTime);
         computerRef.current = timer;
     }, [board, pickedSide]);
 
@@ -36,29 +38,13 @@ export default function MarblesPlayer() {
         console.log("Grundy Value: ", board.grundyValue());
     }, [board]);
 
-    let stones = [];
-    let disabled = !board.turn || !pickedSide;
-    for (let i = 1; i <= board.marbles; i++) {
-        stones.push(
-            <button
-                key={i}
-                className={`stone-button ${disabled || i > board.maxMarblesPerTurn ? "no-hover" : ""}`}
-                onClick={() => {
-                    console.log("Clicked stone:", i);
-                    if (disabled) return;
-                    let functionalAmount = Math.min(board.maxMarblesPerTurn, i);
-                    let move = { amount: functionalAmount };
-                    const newBoard = board.clone();
-                    if (!newBoard.applyMove(move)) {
-                        console.log("Invalid move: ", move);
-                    }
-                    setBoard(newBoard);
-                }}
-                disabled={disabled}
-            ></button>
-        );
-    }
-    stones.reverse();
+    let marblesRenderer = <MarblesRenderer gameState={board} submitter={(move) => {
+        const newBoard = board.clone();
+        if (!newBoard.applyMove(move)) {
+            console.log("Invalid move: ", move);
+        }
+        setBoard(newBoard);
+    }} />
 
     let statusMessage = "";
     if (!pickedSide) {
@@ -122,9 +108,7 @@ export default function MarblesPlayer() {
             {menu}
             <div className="text-lg">{statusMessage}</div>
             {!pickedSide && turnPrompt}
-            <div className="flex flex-row items-end justify-center gap-9 mt-8 min-h-[200px]">
-                {stones}
-            </div>
+            {marblesRenderer}
             {sidebar}
         </div>
     );

@@ -7,6 +7,7 @@ import { GameMenu } from "../game-menu";
 import { GameSidebar } from "../game-sidebar";
 import TurnPrompt from "../turn-prompt";
 import NimRenderer from "./nim-renderer";
+import { computerThinkingTime } from "@/lib/constants";
 
 export default function NimPlayer() {
     const { data: session } = useSession();
@@ -27,7 +28,7 @@ export default function NimPlayer() {
                 console.log("Invalid computer move: ", move);
             }
             setBoard(newBoard);
-        }, 1000);
+        }, computerThinkingTime);
         computerRef.current = timer;
     }, [board, pickedSide]);
 

@@ -8,6 +8,7 @@ import { GameSidebar } from "../game-sidebar";
 import { cn } from "@/lib/utils";
 import { knightValidMoves, knightDirections } from "@/games/knight";
 import TurnPrompt from "../turn-prompt";
+import { computerThinkingTime } from "@/lib/constants";
 
 export default function LoneKnightPlayer() {
     const { data: session } = useSession();
@@ -28,7 +29,7 @@ export default function LoneKnightPlayer() {
                 console.log("Invalid computer move: ", move);
             }
             setBoard(newBoard);
-        }, 1000);
+        }, computerThinkingTime);
         computerRef.current = timer;
     }, [board, pickedSide]);
 
