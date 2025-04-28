@@ -1,21 +1,22 @@
 'use client';
 import { useRouter, useParams } from "next/navigation";
-import { useContext, useEffect, useRef, useState } from "react";
-import { GameContext } from "../../game-context";
+import { useContext, useEffect, useState } from "react";
 import { NimState } from "@/games/nim";
 import { PublicGame } from "@/types/websocket";
 import { SocketContext } from "../../socket-context";
-import { NimMove } from "@/types/nim";
 import NimRenderer from "@/app/games/nim/nim-renderer";
 import { Crown } from "lucide-react";
 import { formatDuration } from "@/types/games";
+import { useSnackbar } from "@/components/snackbar";
+import { timerUpdatePeriod } from "../../layout";
+import PlayerTiles from "../../player-tiles";
 
-const updatePeriod = 500;
 
 export default function NimLive() {
     const router = useRouter();
     const params = useParams();
     const { socket } = useContext(SocketContext);
+    const { addSnackbarMessage } = useSnackbar();
     const [gameData, setGameData] = useState<PublicGame<any> | null>(null);
     const gameCodeP = params.gameCode;
     if (!gameCodeP || !socket) {
@@ -42,7 +43,7 @@ export default function NimLive() {
                 newTimers[currentPlayer] = Math.max(0, newTimers[currentPlayer] - (Date.now() - gameData.lastUpdated));
                 return newTimers;
             });
-        }, updatePeriod));
+        }, timerUpdatePeriod));
         return () => {
             if (timerInterval) {
                 clearInterval(timerInterval);
@@ -55,13 +56,18 @@ export default function NimLive() {
         socket.on("game_info", (data: PublicGame<any>) => {
             console.log("Game Info:", data);
             setGameData(data);
+            // create game state using class constructor
             let tempGameState = new NimState(data.gameState.piles, data.gameState.turn);
             setGameState(tempGameState);
             setDisplayTimers(data.playerTimes);
         });
+        socket.on("game_info_error", (error: string) => {
+            addSnackbarMessage({ text: error, error: true });
+        });
         socket.emit("request_game_info", gameCode);
         return () => {
             socket.removeAllListeners("game_info");
+            socket.removeAllListeners("game_info_error");
         }
     }, [socket, gameCode]);
 
@@ -71,34 +77,8 @@ export default function NimLive() {
         return <div>Loading...</div>
     }
 
-    let playerTiles = <div className="grid grid-cols-2 gap-4 w-5/6">
-        {gameData.players.map((player, index) => {
-            let pfp = <div className={`w-12 h-12 rounded-full bg-blue-500 text-white flex items-center justify-center ${index === 0 ? "mr-2" : "ml-2"}`}>
-                {player.name[0]}
-            </div>;
-            let name = <div className="max-w-[250px] overflow-hidden text-ellipsis">
-                {player.name}
-            </div>;
-            let timer = displayTimers[index];
-            let timerFormatted = formatDuration(timer);
-            let crown = gameData.winner !== null && gameData.winner == index ? <Crown className="ml-2 text-yellow-500" fill="currentColor"/> : null;
-            let timerColor = gameState.turn == (index === 0) ? "bg-white" : "bg-gray-300";
-            let timerDisplay = <div className={`w-12 h-12 rounded-sm border flex items-center justify-center ${timerColor} justify-self-${index === 0 ? "end" : "start"}`}>
-                {timerFormatted}
-            </div>;
-            return (
-                <div key={index} className={`flex flex-row items-center justify-between border p-2 rounded-lg`}>
-                    <div className="flex flex-row items-center">
-                        {index == 0 ? [pfp, name, crown] : [timerDisplay]}
-                    </div>
-                    <div className="flex flex-row items-center">
-                        {index == 0 ? [timerDisplay] : [crown, name, pfp]}
-                    </div>
-                </div>
-            )
-        })}
-    </div>
-
+    let playerTiles = <PlayerTiles players={gameData.players} timers={displayTimers} winner={gameData.winner} turn={gameState.turn} />;
+    
     let nimRenderer = <NimRenderer gameState={gameState} submitter={(move) => {
         // Update local game state
         const newGameState = gameState.clone();
@@ -112,7 +92,7 @@ export default function NimLive() {
     }} />
 
     return <div>
-        <div className="container mx-auto flex flex-col items-center relative" style={{ height: "calc(100vh - var(--navbar-height))" }}>
+        <div className="container mx-auto flex flex-col items-center relative" style={{ height: "calc(99.9vh - var(--navbar-height))" }}>
             <h1 className="text-2xl font-bold my-8">Nim Game</h1>
             {playerTiles}
             {nimRenderer}
