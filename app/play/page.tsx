@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { SocketContext } from "./socket-context";
 import { PublicGame } from "@/types/websocket";
 import { useRouter } from "next/navigation";
-import { gamesToSetup, timeControlsToSetup } from "@/websocket/game-util";
+import { liveGameTypes, liveTimeControlTypes } from "@/websocket/game-util";
 import GameTile from "../games/game-tile";
 import { gameInfo } from "../games/page";
 import { useSnackbar } from "@/components/snackbar";
@@ -84,8 +84,8 @@ export default function PlayPage() {
         };
     }, [socket]);
 
-    let gameTiles = gamesToSetup.map((game) => {
-        let timeControls = timeControlsToSetup.map((timeControl) => <Button key={timeControl} onClick={() => {
+    let gameTiles = liveGameTypes.map((game) => {
+        let timeControls = liveTimeControlTypes.map((timeControl) => <Button key={timeControl} onClick={() => {
             socket?.emit("queue", {
                 gameType: game,
                 timeControl: timeControl

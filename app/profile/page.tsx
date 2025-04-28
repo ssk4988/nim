@@ -4,7 +4,7 @@ import { use, useEffect, useState } from "react";
 import { User } from "@/types/user";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { gamesToSetup, timeControlsToSetup } from "@/websocket/game-util";
+import { liveGameTypes, liveTimeControlTypes } from "@/websocket/game-util";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { displayGameType, displayTimeControl } from "@/types/games";
 import LoadingScreen from "@/components/ui/loading";
@@ -57,8 +57,8 @@ export default function Profile() {
     const options: Intl.DateTimeFormatOptions = { month: "long", year: "numeric" };
     const formattedDate = createdat.toLocaleDateString("en-US", options);
 
-    const gamesInfo = gamesToSetup.map((game) => {
-        return timeControlsToSetup.map((timeControl) => {
+    const gamesInfo = liveGameTypes.map((game) => {
+        return liveTimeControlTypes.map((timeControl) => {
             let gameConfigString = `${game}_${timeControl}`;
             let gameWinString = `${game}_${timeControl}_wins`;
             let gameCountString = `${game}_${timeControl}_games`;
