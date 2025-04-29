@@ -19,10 +19,12 @@ export default function MultiKnightLive() {
     const { addSnackbarMessage } = useSnackbar();
     const [gameData, setGameData] = useState<PublicGame<any> | null>(null);
     const gameCodeP = params.gameCode;
-    if (!gameCodeP || !socket) {
-        router.replace("/play");
-        return null;
-    }
+    // redirects to /play if no game code is provided
+    useEffect(() => {
+        if (!gameCodeP) {
+            router.replace("/play");
+        }
+    });
     const gameCode = gameCodeP as string;
     const [gameState, setGameState] = useState<MultiKnightState | null>(null);
     let [selectedCell, setSelectedCell] = useState<Cell | null>(null);
@@ -54,6 +56,7 @@ export default function MultiKnightLive() {
 
     // load initial game data
     useEffect(() => {
+        if (!socket) return;
         socket.on("game_info", (data: PublicGame<any>) => {
             console.log("Game Info:", data);
             setGameData(data);
@@ -91,6 +94,7 @@ export default function MultiKnightLive() {
         setGameState(newGameState);
         setSelectedCell(null);
         // Send move to server
+        if (!socket) return;
         socket.emit("game_move", gameCode, move);
     }}  selectedCell={selectedCell} setSelectedCell={setSelectedCell}/>
 

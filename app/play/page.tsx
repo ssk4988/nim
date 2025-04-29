@@ -3,7 +3,7 @@ import { useContext, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useSession } from "next-auth/react";
 import { SocketContext } from "./socket-context";
-import { PublicGame } from "@/types/websocket";
+import { Lobby, PublicGame } from "@/types/websocket";
 import { useRouter } from "next/navigation";
 import { liveGameTypes, liveTimeControlTypes } from "@/websocket/game-util";
 import GameTile from "../games/game-tile";
@@ -17,45 +17,46 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrig
 import { displayGameType, displayTimeControl, GameTypeEnum, TimeControlEnum } from "@/types/games";
 import { Switch } from "@/components/ui/switch";
 import { User } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function PlayPage() {
     const { socket, setSocket } = useContext(SocketContext);
     const { addSnackbarMessage } = useSnackbar();
     const router = useRouter();
     const { data: session } = useSession();
-    console.log("Session data: ", session);
-    const token = session?.user?.token;
     const [selectedGame, setSelectedGame] = useState<GameTypeEnum>(GameTypeEnum.NIM);
     const [timeControl, setTimeControl] = useState<TimeControlEnum>(TimeControlEnum.MIN5);
     const [isCreatingRoom, setIsCreatingRoom] = useState(false);
     const [playRandom, setPlayRandom] = useState(true);
+    const [lobbyInput, setLobbyInput] = useState("");
     const handleCreateGame = () => {
         if (!socket || !session) return;
         if (isCreatingRoom) {
             console.log("Canceling room creation");
-            socket.emit("clear_queue");
+            socket.emit("clear_queue_lobby");
             setIsCreatingRoom(false);
             return;
         }
         setIsCreatingRoom(true);
-        socket?.emit("queue", {
-            gameType: selectedGame,
-            timeControl: timeControl
-        });
+        if (playRandom) {
+            socket.emit("queue", {
+                gameType: selectedGame,
+                timeControl: timeControl
+            });
+        } else {
+            socket.emit("lobby", {
+                gameType: selectedGame,
+                timeControl: timeControl,
+            });
+        }
     };
 
-    // Send an error message if user is not logged in
-    useEffect(() => {
-        if (!session) {
-            const timeout = setTimeout(() => {
-                console.log("Session not found");
-                addSnackbarMessage({ text: "You must be logged in to play live games", error: true, duration: Infinity });
-            }, 2000);
-            return () => {
-                clearTimeout(timeout);
-            };
-        }
-    }, [session]);
+    const lobbyInputHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
+        // keep letters and convert to uppercase
+        let code = e.target.value.replace(/[^a-zA-Z]/g, "").toUpperCase();
+        setLobbyInput(code);
+    };
 
     useEffect(() => {
         if (!socket) {
@@ -74,7 +75,7 @@ export default function PlayPage() {
             addSnackbarMessage({ text: "Connection error: " + error, error: true, duration: Infinity });
         });
         // handle queueing errors
-        socket.on("queue_error", (error) => {
+        socket.on("queue_lobby_error", (error) => {
             console.error("Queue Error:", error);
             addSnackbarMessage({ text: "Queue error: " + error, error: true });
         });
@@ -85,7 +86,7 @@ export default function PlayPage() {
         });
 
         // handle queue success - event for successfully adding player to queue
-        socket.on("queue_success", (data: string) => {
+        socket.on("queue_lobby_success", (data: string) => {
             console.log("Queue Success:", data);
             addSnackbarMessage({ text: "Queue success: " + data });
         });
@@ -97,18 +98,25 @@ export default function PlayPage() {
             router.push(`/play/${gameType}/${gameCode}`);
         });
 
+        socket.on("lobby_info", (data: Lobby) => {
+            console.log("Lobby Info:", data);
+            const lobbyCode = data.lobbyCode;
+            router.push(`/play/lobby/${lobbyCode}`);
+        });
+
         // Cleanup on component unmount
         return () => {
             socket.removeAllListeners("message");
             socket.removeAllListeners("connection_error");
-            socket.removeAllListeners("queue_error");
+            socket.removeAllListeners("queue_lobby_error");
             socket.removeAllListeners("disconnect");
-            socket.removeAllListeners("queue_success");
-            socket.removeAllListeners("game_start");
+            socket.removeAllListeners("queue_lobby_success");
+            socket.removeAllListeners("game_info");
+            socket.removeAllListeners("lobby_info");
             console.log("Socket listeners removed");
         };
     }, [socket]);
-    
+
 
     const gameOptions = liveGameTypes.map((game) => {
         return <SelectItem key={game} value={game}>{displayGameType(game)}</SelectItem>;
@@ -123,61 +131,100 @@ export default function PlayPage() {
     }
 
     return <div className="w-full flex flex-col items-center">
-        <Card className="border-2 rounded-lg p-4 mb-4">
-            <CardHeader className="flex flex-col items-center">
-                <CardTitle className="text-2xl font-bold">Live Games</CardTitle>
-                <CardContent>
-                    <CardDescription>
-                        Select a game type and time control to join a live game.
-                    </CardDescription>
-                </CardContent>
-            </CardHeader>
+        <Tabs defaultValue="create" className="w-full">
 
-            <CardContent className="space-y-6">
-                <div className="space-y-2">
-                    <Label htmlFor="game-select">Select Game</Label>
-                    <Select value={selectedGame} onValueChange={(value: GameTypeEnum) => setSelectedGame(value)}>
-                        <SelectTrigger id="game-select" className="w-full">
-                            <SelectValue placeholder="Select a game" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectGroup>
-                                <SelectLabel>Games</SelectLabel>
-                                {gameOptions}
-                            </SelectGroup>
-                        </SelectContent>
-                    </Select>
-                </div>
+            <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="create">Create Game</TabsTrigger>
+                <TabsTrigger value="join">Join Game</TabsTrigger>
+            </TabsList>
+            <TabsContent value="create">
+                <Card className="rounded-lg p-4 mb-4">
+                    <CardHeader className="flex flex-col items-center">
+                        <CardTitle className="text-2xl font-bold">Live Games</CardTitle>
+                        <CardContent>
+                            <CardDescription>
+                                Select a game type and time control to join a live game.
+                            </CardDescription>
+                        </CardContent>
+                    </CardHeader>
 
-                <div className="space-y-2">
-                    <Label htmlFor="time-control">Time Control</Label>
-                    <Select value={timeControl} onValueChange={(value: TimeControlEnum) => setTimeControl(value)}>
-                        <SelectTrigger id="time-control" className="w-full">
-                            <SelectValue placeholder="Select time control" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectGroup>
-                                <SelectLabel>Time Controls</SelectLabel>
-                                {timeControlOptions}
-                            </SelectGroup>
-                        </SelectContent>
-                    </Select>
-                </div>
+                    <CardContent className="space-y-6">
+                        <div className="space-y-2">
+                            <Label htmlFor="game-select">Select Game</Label>
+                            <Select value={selectedGame} onValueChange={(value: GameTypeEnum) => setSelectedGame(value)}>
+                                <SelectTrigger id="game-select" className="w-full">
+                                    <SelectValue placeholder="Select a game" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectGroup>
+                                        <SelectLabel>Games</SelectLabel>
+                                        {gameOptions}
+                                    </SelectGroup>
+                                </SelectContent>
+                            </Select>
+                        </div>
 
-                <div className="flex items-center space-x-2">
-                  <Switch id="ranked-mode" checked={playRandom} onCheckedChange={setPlayRandom} />
-                  <Label htmlFor="ranked-mode" className="flex items-center gap-2">
-                    <User className="h-4 w-4" /> Random Opponent
-                  </Label>
-                </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="time-control">Time Control</Label>
+                            <Select value={timeControl} onValueChange={(value: TimeControlEnum) => setTimeControl(value)}>
+                                <SelectTrigger id="time-control" className="w-full">
+                                    <SelectValue placeholder="Select time control" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectGroup>
+                                        <SelectLabel>Time Controls</SelectLabel>
+                                        {timeControlOptions}
+                                    </SelectGroup>
+                                </SelectContent>
+                            </Select>
+                        </div>
 
-            </CardContent>
-            <CardFooter>
-                <Button className="w-full" onClick={handleCreateGame} disabled={!socket}>
-                    {isCreatingRoom ? <div className="animate-spin h-4 w-4 border-2 border-t-transparent rounded-full mr-2  "></div> : null}
-                    {isCreatingRoom ? "Looking for Opponent... (Click to Cancel)" : "Play Game"}
-                </Button>
-            </CardFooter>
-        </Card>
+                        <div className="flex items-center space-x-2">
+                            <Switch id="ranked-mode" checked={playRandom} onCheckedChange={setPlayRandom} />
+                            <Label htmlFor="ranked-mode" className="flex items-center gap-2">
+                                <User className="h-4 w-4" /> Random Opponent
+                            </Label>
+                        </div>
+
+                    </CardContent>
+                    <CardFooter>
+                        <Button className="w-full" onClick={handleCreateGame} disabled={!socket}>
+                            {isCreatingRoom ? <div className="animate-spin h-4 w-4 border-2 border-t-transparent rounded-full mr-2" /> : null}
+                            {isCreatingRoom ? "Looking for Opponent... (Click to Cancel)" : "Play Game"}
+                        </Button>
+                    </CardFooter>
+                </Card>
+            </TabsContent>
+            <TabsContent value="join">
+                <Card className="rounded-lg p-4 mb-4">
+                    <CardHeader className="flex flex-col items-center">
+                        <CardTitle className="text-2xl font-bold">Join Game</CardTitle>
+                        <CardContent>
+                            <CardDescription>
+                                Enter a lobby code to join a game.
+                            </CardDescription>
+                        </CardContent>
+                    </CardHeader>
+                    <CardContent>
+
+                        <Label htmlFor="lobby-code">Lobby Code</Label>
+                        <Input
+                            id="lobby-code"
+                            placeholder="Enter Lobby Code"
+                            value={lobbyInput}
+                            onChange={lobbyInputHandler}
+                        />
+                    </CardContent>
+                    <CardFooter>
+                        <Button className="w-full" onClick={() => {
+                            if (!socket) return;
+                            socket.emit("join_lobby", lobbyInput);
+                        }} disabled={!socket}>
+                            Join Game
+                        </Button>
+                    </CardFooter>
+                </Card>
+            </TabsContent>
+        </Tabs>
     </div>
 }
