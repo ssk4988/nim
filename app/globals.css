@@ -14,7 +14,15 @@
   --accent-foreground: #ffffff; /* Accent foreground color */
   --ring: #3b82f6; /* Focus ring color */
   --ring-offset-background: var(--background); /* Ring offset background */
+  --card: #ffffff; /* Card background color */
+  --card-foreground: #171717; /* Card text color */
+  --muted-foreground: #535760; /* Muted text color */
+  --popover: #f9fafb; /* Popover background color */
+  --popover-foreground: #171717; /* Popover text color */
+  --input: #f3f4f6; /* Input background color */
+  --input-foreground: #171717; /* Input text color */
 
+  /* board styling */
   --board-square: #f0f0f0; /* Board square color */
   --board-square-hover: #e0e0e0; /* Board square hover color */
   --board-square-piece: #545fef; /* Board square active color */
@@ -139,7 +147,14 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-ring: var(--ring);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-input: var(--input);
 
+  /* colors - board */
   --color-board-square: var(--board-square);
   --color-board-square-hover: var(--board-square-hover);
   --color-board-square-piece: var(--board-square-piece);

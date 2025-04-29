@@ -10,6 +10,13 @@ import GameTile from "../games/game-tile";
 import { gameInfo } from "../games/page";
 import { useSnackbar } from "@/components/snackbar";
 import LoadingScreen from "@/components/ui/loading";
+import { Card } from "@radix-ui/themes";
+import { CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { displayGameType, displayTimeControl, GameTypeEnum, TimeControlEnum } from "@/types/games";
+import { Switch } from "@/components/ui/switch";
+import { User } from "lucide-react";
 
 export default function PlayPage() {
     const { socket, setSocket } = useContext(SocketContext);
@@ -18,6 +25,24 @@ export default function PlayPage() {
     const { data: session } = useSession();
     console.log("Session data: ", session);
     const token = session?.user?.token;
+    const [selectedGame, setSelectedGame] = useState<GameTypeEnum>(GameTypeEnum.NIM);
+    const [timeControl, setTimeControl] = useState<TimeControlEnum>(TimeControlEnum.MIN5);
+    const [isCreatingRoom, setIsCreatingRoom] = useState(false);
+    const [playRandom, setPlayRandom] = useState(true);
+    const handleCreateGame = () => {
+        if (!socket || !session) return;
+        if (isCreatingRoom) {
+            console.log("Canceling room creation");
+            socket.emit("clear_queue");
+            setIsCreatingRoom(false);
+            return;
+        }
+        setIsCreatingRoom(true);
+        socket?.emit("queue", {
+            gameType: selectedGame,
+            timeControl: timeControl
+        });
+    };
 
     // Send an error message if user is not logged in
     useEffect(() => {
@@ -83,29 +108,76 @@ export default function PlayPage() {
             console.log("Socket listeners removed");
         };
     }, [socket]);
+    
 
-    let gameTiles = liveGameTypes.map((game) => {
-        let timeControls = liveTimeControlTypes.map((timeControl) => <Button key={timeControl} onClick={() => {
-            socket?.emit("queue", {
-                gameType: game,
-                timeControl: timeControl
-            });
-        }}>{timeControl}</Button>);
-        let infoForGame = gameInfo.find((info) => info.gameType === game)!;
-        return <GameTile key={game} {...infoForGame}>
-            <div className="flex flex-row mb-4 gap-2">
-                {timeControls}
-            </div>
-        </GameTile>;
+    const gameOptions = liveGameTypes.map((game) => {
+        return <SelectItem key={game} value={game}>{displayGameType(game)}</SelectItem>;
+    });
+
+    const timeControlOptions = liveTimeControlTypes.map((timeControl) => {
+        return <SelectItem key={timeControl} value={timeControl}>{displayTimeControl(timeControl)}</SelectItem>;
     });
 
     if (!socket) {
         return <LoadingScreen text="Connecting to WebSocket server..." />;
     }
 
-    return (
-        <div className="grid grid-cols-4 sm:grid-cols-4 gap-4">
-            {gameTiles}
-        </div>
-    );
+    return <div className="w-full flex flex-col items-center">
+        <Card className="border-2 rounded-lg p-4 mb-4">
+            <CardHeader className="flex flex-col items-center">
+                <CardTitle className="text-2xl font-bold">Live Games</CardTitle>
+                <CardContent>
+                    <CardDescription>
+                        Select a game type and time control to join a live game.
+                    </CardDescription>
+                </CardContent>
+            </CardHeader>
+
+            <CardContent className="space-y-6">
+                <div className="space-y-2">
+                    <Label htmlFor="game-select">Select Game</Label>
+                    <Select value={selectedGame} onValueChange={(value: GameTypeEnum) => setSelectedGame(value)}>
+                        <SelectTrigger id="game-select" className="w-full">
+                            <SelectValue placeholder="Select a game" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectGroup>
+                                <SelectLabel>Games</SelectLabel>
+                                {gameOptions}
+                            </SelectGroup>
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                <div className="space-y-2">
+                    <Label htmlFor="time-control">Time Control</Label>
+                    <Select value={timeControl} onValueChange={(value: TimeControlEnum) => setTimeControl(value)}>
+                        <SelectTrigger id="time-control" className="w-full">
+                            <SelectValue placeholder="Select time control" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectGroup>
+                                <SelectLabel>Time Controls</SelectLabel>
+                                {timeControlOptions}
+                            </SelectGroup>
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Switch id="ranked-mode" checked={playRandom} onCheckedChange={setPlayRandom} />
+                  <Label htmlFor="ranked-mode" className="flex items-center gap-2">
+                    <User className="h-4 w-4" /> Random Opponent
+                  </Label>
+                </div>
+
+            </CardContent>
+            <CardFooter>
+                <Button className="w-full" onClick={handleCreateGame} disabled={!socket}>
+                    {isCreatingRoom ? <div className="animate-spin h-4 w-4 border-2 border-t-transparent rounded-full mr-2  "></div> : null}
+                    {isCreatingRoom ? "Looking for Opponent... (Click to Cancel)" : "Play Game"}
+                </Button>
+            </CardFooter>
+        </Card>
+    </div>
 }
