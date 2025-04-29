@@ -65,6 +65,7 @@ export interface ClientToServerEvents {
     "queue": (game: GameConfig) => void;
     "request_game_info": (gameCode: string) => void;
     "game_move": (gameCode: string, move: any) => void;
+    "clear_queue": () => void;
 }
 
 export type TypedSocket = Socket<ClientToServerEvents, ServerToClientEvents>;

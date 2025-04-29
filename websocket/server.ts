@@ -301,6 +301,7 @@ io.on("connection", (socket: TypedSocket) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET!);
     console.log("Decoded token:", decoded);
+    // @ts-ignore
     token_info = decoded;
   } catch (err) {
     console.error("Invalid token:", err);
@@ -412,6 +413,30 @@ io.on("connection", (socket: TypedSocket) => {
 
     // pair players from the queue
     pairGamesInQueue(gameConfig);
+  });
+
+  // remove from queue
+  socket.on("clear_queue", () => {
+    console.log(`User ${userId} requested to clear queue`);
+    if (!wsState.currentQueue) {
+      socket.emit("queue_error", "User is not in a queue");
+      return;
+    }
+    const queueList = queue.get(wsState.currentQueue);
+    if (!queueList) {
+      socket.emit("queue_error", "Game is not supported");
+      return;
+    }
+    // remove the user from the queue
+    const index = queueList.indexOf(wsKey);
+    if (index !== -1) {
+      queueList.splice(index, 1);
+      console.log(`User ${userId} removed from queue for game ${wsState.currentQueue}`);
+    } else {
+      console.log(`User ${userId} not found in queue for game ${wsState.currentQueue}`);
+    }
+    wsState.currentQueue = null;
+    socket.emit("queue_success", `User ${userId} removed from queue for game ${wsState.currentQueue}`);
   });
 
   // handle game info requests
