@@ -19,7 +19,7 @@
   --muted-foreground: #535760; /* Muted text color */
   --popover: #f9fafb; /* Popover background color */
   --popover-foreground: #171717; /* Popover text color */
-  --input: #f3f4f6; /* Input background color */
+  --input: #535760; /* Input border color */
   --input-foreground: #171717; /* Input text color */
 
   /* board styling */

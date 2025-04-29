@@ -1,5 +1,6 @@
 'use client';
 
+import { useSnackbar } from "@/components/snackbar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,6 +12,7 @@ import { useState } from "react";
 export default function Signup() {
     const searchParams = useSearchParams();
     const nameParam = searchParams.get("name");
+    const { addSnackbarMessage } = useSnackbar();
     const email = searchParams.get("email") || "";
     const token = searchParams.get("token");
     const [isLoading, setIsLoading] = useState(false)
@@ -33,7 +35,7 @@ export default function Signup() {
             credentials: "include",
         });
         if (res.ok) {
-            console.log("Signup successful!");
+            addSnackbarMessage({ text: "Account created successfully", duration: 5000 });
             // Log in the user with FakeCredentials
             const loginResponse = await signIn("credentials", {
                 email, // Pass the email
@@ -43,6 +45,7 @@ export default function Signup() {
             });
 
             if (loginResponse?.error) {
+                addSnackbarMessage({ text: "Error signing in: " + loginResponse.error, error: true, duration: 5000 });
                 console.error("Error signing in: ", loginResponse.error);
             } else {
                 console.log("User signed in successfully");
@@ -52,6 +55,7 @@ export default function Signup() {
         } else {
             console.error("Signup failed");
             const errorData = await res.json();
+            addSnackbarMessage({ text: "Error signing up: " + errorData.error, error: true, duration: 5000 });
             console.error("Error: ", errorData);
         }
         setIsLoading(false);
