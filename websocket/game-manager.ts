@@ -71,10 +71,12 @@ export function makeGameRoom(game: GameConfig, player1: string, player2: string)
   const player1Data: PlayerData = {
     userId: player1State.userId,
     name: player1State.userEmail,
+    username: player1State.username,
   };
   const player2Data: PlayerData = {
     userId: player2State.userId,
     name: player2State.userEmail,
+    username: player2State.username,
   };
   let firstPlayer = Math.floor(Math.random() * 2);
   let timeMs = timeControlToMilliseconds(game.timeControl);
@@ -120,8 +122,8 @@ export function endGameRoom(gameCode: string): boolean {
   }
 
   // Find the connection for both players
-  const player1Key = getWsKey(gameData.players[0].userId);
-  const player2Key = getWsKey(gameData.players[1].userId);
+  const player1Key = getWsKey(gameData.players[0].username);
+  const player2Key = getWsKey(gameData.players[1].username);
   const player1State = connections.get(player1Key);
   const player2State = connections.get(player2Key);
 

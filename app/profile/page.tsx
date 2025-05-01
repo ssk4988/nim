@@ -83,7 +83,8 @@ export default function Profile() {
         <div className="container mx-auto px-4 py-12">
             <div className="mb-8 flex flex-col items-center justify-between gap-4 sm:flex-row">
                 <div>
-                    <h1 className="text-3xl font-bold">{profile.name}</h1>
+                    <p className="text-3xl font-bold">{profile.username}</p>
+                    <p className="text-lg font-semibold">{profile.name}</p>
                     <p className="text-muted-foreground">{profile.email}</p>
                     <p className="text-sm text-muted-foreground">Member since {formattedDate}</p>
                 </div>
@@ -95,10 +96,13 @@ export default function Profile() {
                 <h2>Total Games Played: {profile.games}</h2>
             </div>
             <div className="container mx-auto mt-8">
-                <h2 className="text-2xl font-bold">Game Statistics</h2>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                    {gamesInfo}
-                </div>
+                <h2 className="text-2xl font-bold">Live Game Statistics</h2>
+                {gamesInfo.length > 0 ?
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                        {gamesInfo}
+                    </div> :
+                    <p>No game statistics available. Play some live games!</p>}
+
             </div>
         </div>
     )

@@ -32,4 +32,5 @@ model users {
   multiknight_5m_wins   Int      @default(0)
   multiknight_1m_wins   Int      @default(0)
   multiknight_15s_wins  Int      @default(0)
+  username              String   @unique @db.VarChar(100)
 }

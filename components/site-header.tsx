@@ -43,7 +43,7 @@ export function SiteHeader() {
     const pathname = usePathname();
     const { data: session } = useSession();
     const user = session?.user;
-    const userName = user?.name || "Guest";
+    const userName = user?.username || "Guest";
 
     const profileButton = user ? (
         <Button variant="link" size="sm" asChild>

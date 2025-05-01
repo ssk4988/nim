@@ -10,13 +10,13 @@ export interface PlayerTilesProps {
 };
 
 export default function PlayerTiles({ players, timers, winner, turn }: PlayerTilesProps) {
-    return <div className="grid grid-cols-2 gap-4 w-5/6">
+    return <div className="grid grid-cols-2 gap-4 w-3/4">
         {players.map((player, index) => {
             let pfp = <div className={`w-12 h-12 rounded-full bg-blue-500 text-white flex items-center justify-center ${index === 0 ? "mr-2" : "ml-2"}`}>
-                {player.name[0]}
+                {player.username[0]}
             </div>;
             let name = <div className="max-w-[250px] overflow-hidden text-ellipsis">
-                {player.name}
+                {player.username}
             </div>;
             let timer = timers[index];
             let timerFormatted = formatDuration(timer);
