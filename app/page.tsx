@@ -12,7 +12,7 @@ export default function Home() {
         </p>
         <div className="flex justify-center gap-4">
           <Button asChild>
-            <Link href="/games">Play Games</Link>
+            <Link href="/games">Explore Games</Link>
           </Button>
           <Button variant="outline" asChild>
             <Link href="/articles">Read Articles</Link>

@@ -15,6 +15,29 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Menu } from "lucide-react"
 import { signIn, useSession } from "next-auth/react"
+import { Header } from "@radix-ui/themes/components/table"
+
+function HeaderButton({ href, name, pathname }: {
+    href: string,
+    name: string,
+    pathname: string
+}) {
+    let isActive = pathname === href;
+    let className = "group inline-flex h-9 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50";
+    if (isActive) {
+        className += " underline decoration-2 underline-offset-4";
+    }
+    return <NavigationMenuItem>
+        <Link href={href} legacyBehavior passHref>
+            <NavigationMenuLink
+                className={className}
+            >
+                {name}
+            </NavigationMenuLink>
+        </Link>
+    </NavigationMenuItem>
+
+}
 
 export function SiteHeader() {
     const pathname = usePathname();
@@ -23,7 +46,7 @@ export function SiteHeader() {
     const userName = user?.name || "Guest";
 
     const profileButton = user ? (
-        <Button variant="ghost" size="sm" asChild>
+        <Button variant="link" size="sm" asChild>
             <Link href="/profile">{userName}</Link>
         </Button>
     ) : (
@@ -42,33 +65,9 @@ export function SiteHeader() {
 
                 <NavigationMenu className="hidden md:ml-auto md:flex">
                     <NavigationMenuList>
-                        <NavigationMenuItem>
-                            <Link href="/live" legacyBehavior passHref>
-                                <NavigationMenuLink
-                                    className={`group inline-flex h-9 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50 ${pathname === "/" ? "bg-accent/50" : ""}`}
-                                >
-                                    Live
-                                </NavigationMenuLink>
-                            </Link>
-                        </NavigationMenuItem>
-                        <NavigationMenuItem>
-                            <Link href="/games" legacyBehavior passHref>
-                                <NavigationMenuLink
-                                    className={`group inline-flex h-9 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50 ${pathname === "/" ? "bg-accent/50" : ""}`}
-                                >
-                                    Games
-                                </NavigationMenuLink>
-                            </Link>
-                        </NavigationMenuItem>
-                        <NavigationMenuItem>
-                            <Link href="/articles" legacyBehavior passHref>
-                                <NavigationMenuLink
-                                    className={`group inline-flex h-9 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50 ${pathname.startsWith("/articles") ? "bg-accent/50" : ""}`}
-                                >
-                                    Articles
-                                </NavigationMenuLink>
-                            </Link>
-                        </NavigationMenuItem>
+                        <HeaderButton href="/live" name="Live" pathname={pathname} />
+                        <HeaderButton href="/games" name="Games" pathname={pathname} />
+                        <HeaderButton href="/articles" name="Articles" pathname={pathname} />
                     </NavigationMenuList>
                 </NavigationMenu>
 
