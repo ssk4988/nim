@@ -19,10 +19,10 @@ export default function MultiKnightLive() {
     const { addSnackbarMessage } = useSnackbar();
     const [gameData, setGameData] = useState<PublicGame<any> | null>(null);
     const gameCodeP = params.gameCode;
-    // redirects to /play if no game code is provided
+    // redirects to /live if no game code is provided
     useEffect(() => {
         if (!gameCodeP) {
-            router.replace("/play");
+            router.replace("/live");
         }
     });
     const gameCode = gameCodeP as string;
@@ -100,7 +100,7 @@ export default function MultiKnightLive() {
 
     return <div>
         <div className="container mx-auto flex flex-col items-center relative" style={{ height: "calc(99.9vh - var(--navbar-height))" }}>
-            <h1 className="text-2xl font-bold my-8">Multi Knight Game</h1>
+            <h1 className="text-2xl font-bold my-8">Multi Knight</h1>
             {playerTiles}
             <div className="my-4"/>
             {multiKnightRenderer}

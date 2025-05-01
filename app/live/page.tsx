@@ -95,13 +95,13 @@ export default function PlayPage() {
             console.log("Game Start:", data);
             const gameCode = data.code;
             const gameType = data.gameConfig.gameType;
-            router.push(`/play/${gameType}/${gameCode}`);
+            router.push(`/live/${gameType}/${gameCode}`);
         });
 
         socket.on("lobby_info", (data: Lobby) => {
             console.log("Lobby Info:", data);
             const lobbyCode = data.lobbyCode;
-            router.push(`/play/lobby/${lobbyCode}`);
+            router.push(`/live/lobby/${lobbyCode}`);
         });
 
         // Cleanup on component unmount

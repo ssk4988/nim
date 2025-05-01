@@ -14,10 +14,10 @@ export default function JoinPage() {
     const { socket } = useContext(SocketContext);
     const { addSnackbarMessage } = useSnackbar();
     const lobbyCodeP = params.lobbyCode;
-    // redirects to /play if no lobby code is provided
+    // redirects to /live if no lobby code is provided
     useEffect(() => {
         if (!lobbyCodeP) {
-            router.replace("/play");
+            router.replace("/live");
         }
     });
     const lobbyCode = lobbyCodeP as string;
@@ -29,12 +29,12 @@ export default function JoinPage() {
         socket.on("queue_lobby_error", (error: string) => {
             console.log("Queue Error:", error);
             addSnackbarMessage({ text: error, error: true, duration: 5000 });
-            router.replace("/play");
+            router.replace("/live");
         });
         socket.on("game_info", (data: PublicGame<any>) => {
             let gameConfig = data.gameConfig;
             let gameCode = data.code;
-            router.push(`/play/${gameConfig.gameType}/${gameCode}`);
+            router.push(`/live/${gameConfig.gameType}/${gameCode}`);
         });
         socket.emit("join_lobby", lobbyCode);
         return () => {

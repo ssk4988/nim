@@ -18,10 +18,10 @@ export default function LobbyPage() {
     const [lobbyData, setLobbyData] = useState<Lobby | null>(null);
     const { addSnackbarMessage } = useSnackbar();
     const lobbyCodeP = params.lobbyCode;
-    // redirects to /play if no lobby code is provided
+    // redirects to /live if no lobby code is provided
     useEffect(() => {
         if (!lobbyCodeP) {
-            router.replace("/play");
+            router.replace("/live");
         }
     });
     const lobbyCode = lobbyCodeP as string;
@@ -37,7 +37,7 @@ export default function LobbyPage() {
         socket.on("lobby_info_error", (error: string) => {
             console.log("Lobby Error:", error);
             addSnackbarMessage({ text: error, error: true, duration: 5000 });
-            // router.replace("/play");
+            // router.replace("/live");
         });
         socket.on("queue_lobby_error", (error: string) => {
             console.log("Queue Error:", error);
@@ -46,7 +46,7 @@ export default function LobbyPage() {
         socket.on("game_info", (data: PublicGame<any>) => {
             let gameConfig = data.gameConfig;
             let gameCode = data.code;
-            router.push(`/play/${gameConfig.gameType}/${gameCode}`);
+            router.push(`/live/${gameConfig.gameType}/${gameCode}`);
         });
         socket.emit("request_lobby_info", lobbyCode);
         return () => {
@@ -74,7 +74,7 @@ export default function LobbyPage() {
                             addSnackbarMessage({ text: "Lobby code copied to clipboard", duration: 2000 });
                         }} />
                         <Link2 className="mr-2 cursor-pointer" onClick={() => {
-                            const routeLink = `${window.location.origin}/play/join/${lobbyCode}`;
+                            const routeLink = `${window.location.origin}/live/join/${lobbyCode}`;
                             navigator.clipboard.writeText(routeLink);
                             addSnackbarMessage({ text: "Lobby link copied to clipboard", duration: 2000 });
                         }} />
@@ -91,7 +91,7 @@ export default function LobbyPage() {
                 <Button className="mt-4 w-full" onClick={() => {
                     if(!socket) return;
                     socket.emit("clear_queue_lobby");
-                    router.replace("/play");
+                    router.replace("/live");
                 }}>Cancel</Button>
             </CardFooter>
         </Card>
