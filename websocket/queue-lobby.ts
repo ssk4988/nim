@@ -26,6 +26,7 @@ export function makeLobby(gameConfig: GameConfig, player: string) {
     const playerData: PlayerData = {
         userId: playerState.userId,
         name: playerState.userEmail,
+        username: playerState.username,
     };
     const lobbyData: Lobby = {
         lobbyCode: lobbyCode,
@@ -52,7 +53,7 @@ export function deleteLobby(lobbyCode: string) {
         return;
     }
     // Find the connection for the player
-    const playerKey = getWsKey(lobbyData.player.userId);
+    const playerKey = getWsKey(lobbyData.player.username);
     const playerState = connections.get(playerKey);
     if (!playerState) {
         console.log(`Error retrieving connection state for player ${playerKey}`);
@@ -68,9 +69,9 @@ export function deleteLobby(lobbyCode: string) {
 // emits socket events if socket is provided
 export const clearQueueLobbyHandler = (wsState: WSState, socket?: TypedSocket) => {
     return () => {
-        const userId = wsState.userId;
-        const wsKey = getWsKey(userId);
-        console.log(`Clearing queue/lobby of User ${userId}`);
+        const username = wsState.username;
+        const wsKey = getWsKey(username);
+        console.log(`Clearing queue/lobby of User ${username}`);
         if (!wsState.currentQueue && !wsState.currentLobby) {
             if (socket) socket.emit("queue_lobby_error", "User is not in a queue or lobby");
             return;
@@ -78,14 +79,14 @@ export const clearQueueLobbyHandler = (wsState: WSState, socket?: TypedSocket) =
         if (wsState.currentLobby) {
             const lobbyData = lobbies.get(wsState.currentLobby);
             if (!lobbyData) {
-                console.log(`Lobby not found for user ${userId} even though they are in a lobby`);
+                console.log(`Lobby not found for user ${username} even though they are in a lobby`);
                 wsState.currentLobby = null;
             } else {
                 // remove the user from the lobby
                 let currentLobby = lobbyData.lobbyCode;
                 deleteLobby(wsState.currentLobby);
-                console.log(`User ${userId} removed from lobby ${currentLobby}`);
-                if (socket) socket.emit("queue_lobby_success", `User ${userId} removed from lobby ${currentLobby}`);
+                console.log(`User ${username} removed from lobby ${currentLobby}`);
+                if (socket) socket.emit("queue_lobby_success", `User ${username} removed from lobby ${currentLobby}`);
                 wsState.currentLobby = null; // just to be safe
             }
         }
@@ -99,11 +100,11 @@ export const clearQueueLobbyHandler = (wsState: WSState, socket?: TypedSocket) =
             const index = queueList.indexOf(wsKey);
             if (index !== -1) {
                 queueList.splice(index, 1);
-                console.log(`User ${userId} removed from queue for game ${JSON.stringify(wsState.currentQueue)}`);
+                console.log(`User ${username} removed from queue for game ${JSON.stringify(wsState.currentQueue)}`);
             } else {
-                console.log(`User ${userId} not found in queue for game ${JSON.stringify(wsState.currentQueue)}`);
+                console.log(`User ${username} not found in queue for game ${JSON.stringify(wsState.currentQueue)}`);
             }
-            if (socket) socket.emit("queue_lobby_success", `User ${userId} removed from queue for game ${JSON.stringify(wsState.currentQueue)}`);
+            if (socket) socket.emit("queue_lobby_success", `User ${username} removed from queue for game ${JSON.stringify(wsState.currentQueue)}`);
             wsState.currentQueue = null;
         }
     }
@@ -116,9 +117,9 @@ export const lobbyHandler = (wsState: WSState, socket: TypedSocket) => {
             socket.emit("queue_lobby_error", "Game config is not formatted correctly");
             return;
         }
-        const userId = wsState.userId;
-        const wsKey = getWsKey(userId);
-        console.log(`User ${userId} requested lobby for game ${JSON.stringify(gameConfig)}`);
+        const username = wsState.username;
+        const wsKey = getWsKey(username);
+        console.log(`User ${username} requested lobby for game ${JSON.stringify(gameConfig)}`);
         // using this to check if the gameConfig is valid, queue isn't used
         const queueList = queues.get(gameConfig);
         if (!queueList) {
@@ -131,7 +132,7 @@ export const lobbyHandler = (wsState: WSState, socket: TypedSocket) => {
         if (wsState.gameCode) {
             if (!games.has(wsState.gameCode)) {
                 // clear the game code if it doesn't exist (shouldn't happen)
-                console.log(`User ${userId} is in a game ${wsState.gameCode} but the game doesn't exist`);
+                console.log(`User ${username} is in a game ${wsState.gameCode} but the game doesn't exist`);
                 wsState.gameCode = null;
             } else {
                 socket.emit("queue_lobby_error", "User is already in a game");
@@ -148,9 +149,9 @@ export const queueHandler = (wsState: WSState, socket: TypedSocket) => {
             socket.emit("queue_lobby_error", "Game config is not formatted correctly");
             return;
         }
-        const userId = wsState.userId;
-        const wsKey = getWsKey(userId);
-        console.log(`User ${userId} requested game ${JSON.stringify(gameConfig)}`);
+        const username = wsState.username;
+        const wsKey = getWsKey(username);
+        console.log(`User ${username} requested game ${JSON.stringify(gameConfig)}`);
         const queueList = queues.get(gameConfig);
         if (!queueList) {
             socket.emit("queue_lobby_error", "Game is not supported");
@@ -161,7 +162,7 @@ export const queueHandler = (wsState: WSState, socket: TypedSocket) => {
         if (wsState.gameCode) {
             if (!games.has(wsState.gameCode)) {
                 // clear the game code if it doesn't exist (shouldn't happen)
-                console.log(`User ${userId} is in a game ${wsState.gameCode} but the game doesn't exist`);
+                console.log(`User ${username} is in a game ${wsState.gameCode} but the game doesn't exist`);
                 wsState.gameCode = null;
             } else {
                 socket.emit("queue_lobby_error", "User is already in a game");
@@ -172,7 +173,7 @@ export const queueHandler = (wsState: WSState, socket: TypedSocket) => {
         // Add the user to the queue
         queueList.push(wsKey);
         wsState.currentQueue = gameConfig;
-        socket.emit("queue_lobby_success", `User ${userId} added to queue for game ${JSON.stringify(gameConfig)}`);
+        socket.emit("queue_lobby_success", `User ${username} added to queue for game ${JSON.stringify(gameConfig)}`);
         console.log(`Queue for game ${gameConfig}:`, queueList);
 
         // pair players from the queue
@@ -183,9 +184,9 @@ export const queueHandler = (wsState: WSState, socket: TypedSocket) => {
 // join an existing lobby
 export const joinLobbyHandler = (wsState: WSState, socket: TypedSocket) => {
     return (lobbyCode: string) => {
-        const userId = wsState.userId;
-        const wsKey = getWsKey(userId);
-        console.log(`User ${userId} requested to join lobby ${lobbyCode}`);
+        const username = wsState.username;
+        const wsKey = getWsKey(username);
+        console.log(`User ${username} requested to join lobby ${lobbyCode}`);
         const lobbyData = lobbies.get(lobbyCode);
         if (!lobbyData) {
             socket.emit("queue_lobby_error", "Lobby not found");
@@ -197,7 +198,7 @@ export const joinLobbyHandler = (wsState: WSState, socket: TypedSocket) => {
         if (wsState.gameCode) {
             if (!games.has(wsState.gameCode)) {
                 // clear the game code if it doesn't exist (shouldn't happen)
-                console.log(`User ${userId} is in a game ${wsState.gameCode} but the game doesn't exist`);
+                console.log(`User ${username} is in a game ${wsState.gameCode} but the game doesn't exist`);
                 wsState.gameCode = null;
             } else {
                 socket.emit("queue_lobby_error", "User is already in a game");
@@ -207,7 +208,7 @@ export const joinLobbyHandler = (wsState: WSState, socket: TypedSocket) => {
         
         // promote the lobby into a game
         const originalPlayerData = lobbyData.player;
-        const originalWsKey = getWsKey(originalPlayerData.userId);
+        const originalWsKey = getWsKey(originalPlayerData.username);
         const originalPlayerState = connections.get(originalWsKey);
         if (!originalPlayerState) {
             console.log(`Error retrieving connection state for player ${originalWsKey}`);

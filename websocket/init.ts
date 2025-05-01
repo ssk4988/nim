@@ -43,6 +43,6 @@ export const gameTimeouts: Map<string, NodeJS.Timeout> = new Map();
 // map of lobbies
 export const lobbies: Map<string, Lobby> = new Map();
 
-export function getWsKey(userId: number): string {
-  return `ws:${userId}`;
+export function getWsKey(username: string): string {
+  return `ws:${username}`;
 }

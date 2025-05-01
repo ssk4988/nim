@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { validUsername } from "@/types/user";
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
@@ -17,6 +18,29 @@ export default function Signup() {
     const token = searchParams.get("token");
     const [isLoading, setIsLoading] = useState(false)
     const [name, setName] = useState(nameParam || "");
+    const [username, setUsername] = useState("");
+
+    const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        if (value.length > 0 && !/^[a-zA-Z0-9_]+$/.test(value[0])) {
+            addSnackbarMessage({ text: "Username must start with a letter", error: true, duration: 5000 });
+            return;
+        }
+        if (value.length > 20) {
+            addSnackbarMessage({ text: "Username must be 20 or fewer characters", error: true, duration: 5000 });
+            return;
+        }
+        if (value.length < 3) {
+            addSnackbarMessage({ text: "Username must be at least 3 characters", error: true, duration: 5000 });
+            setUsername(value);
+            return;
+        }
+        if (!validUsername(value)) {
+            addSnackbarMessage({ text: "Username can only contain letters, numbers, and underscores", error: true, duration: 5000 });
+            return;
+        }
+        setUsername(value);
+    }
 
     const handleSignup = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -30,7 +54,8 @@ export default function Signup() {
             body: JSON.stringify({
                 name,
                 email,
-                token
+                token,
+                username
             }),
             credentials: "include",
         });
@@ -79,6 +104,20 @@ export default function Signup() {
                                 disabled
                                 required
                             />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="username">Username</Label>
+                            <Input
+                                id="username"
+                                type="text"
+                                value={username}
+                                onChange={handleUsernameChange}
+                                required
+                            />
+                            {/* <p className="text-sm text-muted-foreground">
+                                Usernames are alphanumeric and can contain underscores, and must be between 3 and 20 characters long.
+                                Must start with a letter.
+                            </p> */}
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="name">Name</Label>

@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import NextAuth, { NextAuthOptions } from "next-auth";
+import NextAuth, { NextAuthOptions, TokenInfo } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import jwt from "jsonwebtoken";
@@ -36,7 +36,7 @@ export const authOptions: NextAuthOptions = {
                 });
                 console.log("User: ", user);
                 if (user) {
-                    // If user exists, return the user object
+                    // If user exists, return the partial user object (used in callbacks)
                     return {
                         id: user.userid,
                         email: user.email,
@@ -82,7 +82,7 @@ export const authOptions: NextAuthOptions = {
             console.log("session callback: ", session, token);
             // Add the user ID to the session object
             if (token.email && session.user) {
-                if(!session.user.id || !session.user.name || !session.user.email) {
+                if(!session.user.id || !session.user.name || !session.user.email || !session.user.username) {
                     const dbUser = await prisma.users.findUnique({
                         where: { email: token.email },
                     });
@@ -90,11 +90,13 @@ export const authOptions: NextAuthOptions = {
                         if(dbUser.userid) session.user.id = dbUser.userid;
                         if(dbUser.name) session.user.name = dbUser.name;
                         if(dbUser.email) session.user.email = dbUser.email;
+                        if(dbUser.username) session.user.username = dbUser.username;
                     }
                 }
                 if(!session.user.token) {
+                    let token_info: TokenInfo = { email: session.user.email, name: session.user.name, id: session.user.id, username: session.user.username };
                     session.user.token = jwt.sign(
-                        { email: session.user.email, name: session.user.name, id: session.user.id },
+                        token_info,
                         process.env.JWT_SECRET!,
                         { expiresIn: "1d" } // 1 day
                     );

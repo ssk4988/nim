@@ -57,14 +57,15 @@ io.on("connection", (socket: TypedSocket) => {
   // Store the websocket information
   const userId = token_info.id;
   const userEmail = token_info.email;
-  const wsKey = getWsKey(userId);
+  const username = token_info.username;
+  const wsKey = getWsKey(username);
   const keyExists = connections.has(wsKey);
   let wsStateTemp: WSState;
   if (keyExists) {
     wsStateTemp = connections.get(wsKey)!;
     let wsExists = wsStateTemp.socketId !== null;
     if (wsExists) {
-      console.log(`WebSocket connection already exists for user ${userId}`);
+      console.log(`WebSocket connection already exists for user ${username}`);
       socket.emit("connection_error", "WebSocket connection already exists");
       socket.disconnect();
       return;
@@ -76,6 +77,7 @@ io.on("connection", (socket: TypedSocket) => {
       socketId: socket.id,
       userId: userId,
       userEmail: userEmail,
+      username: username,
       currentQueue: null,
       currentLobby: null,
       gameCode: null,
@@ -83,35 +85,35 @@ io.on("connection", (socket: TypedSocket) => {
     connections.set(wsKey, wsStateTemp);
   }
   const wsState = connections.get(wsKey)!;
-  console.log(`WebSocket connection stored in map for user ${userId}:`, wsState);
+  console.log(`WebSocket connection stored in map for user ${username}:`, wsState);
 
   // Send game info if the user is already in a game
   if (wsState.gameCode) {
     const gameData = games.get(wsState.gameCode);
     if (!gameData) {
-      console.log(`Game not found for user ${userId} even though they are in a game`);
+      console.log(`Game not found for user ${username} even though they are in a game`);
       wsState.gameCode = null;
     } else {
       const publicGameData = makePublicGame(gameData);
       const adjustedGameData = flipGamePerspective(publicGameData, gameData.players[0].userId !== userId);
       socket.emit("game_info", adjustedGameData);
-      console.log(`Game data sent to user ${userId}:`, adjustedGameData);
+      console.log(`Game data sent to user ${username}:`, adjustedGameData);
     }
   }
   // Send lobby info if the user is already in a lobby
   else if (wsState.currentLobby) {
     const lobbyData = lobbies.get(wsState.currentLobby);
     if (!lobbyData) {
-      console.log(`Lobby not found for user ${userId} even though they are in a lobby`);
+      console.log(`Lobby not found for user ${username} even though they are in a lobby`);
       wsState.currentLobby = null;
     } else {
       const playerData = lobbyData.player;
       if (playerData.userId !== userId) {
-        console.log(`User ${userId} is not in the lobby ${lobbyData.lobbyCode}`);
+        console.log(`User ${username} is not in the lobby ${lobbyData.lobbyCode}`);
         wsState.currentLobby = null;
       } else {
         socket.emit("lobby_info", lobbyData);
-        console.log(`Lobby data sent to user ${userId}:`, lobbyData);
+        console.log(`Lobby data sent to user ${username}:`, lobbyData);
       }
     }
   }
@@ -140,7 +142,7 @@ io.on("connection", (socket: TypedSocket) => {
 
   // handle game info requests
   socket.on("request_game_info", (gameCode) => {
-    console.log(`User ${userId} requested game info for game code ${gameCode}`);
+    console.log(`User ${username} requested game info for game code ${gameCode}`);
     const gameData = games.get(gameCode);
     if (!gameData) {
       socket.emit("game_info_error", "Game not found");
@@ -154,12 +156,12 @@ io.on("connection", (socket: TypedSocket) => {
     const publicGameData = makePublicGame(gameData);
     const adjustedGameData = flipGamePerspective(publicGameData, gameData.players[0].userId !== userId);
     socket.emit("game_info", adjustedGameData);
-    console.log(`Game data sent to user ${userId}:`, adjustedGameData);
+    console.log(`Game data sent to user ${username}:`, adjustedGameData);
   });
 
   // handle lobby info requests
   socket.on("request_lobby_info", (lobbyCode: string) => {
-    console.log(`User ${userId} requested lobby info for lobby code ${lobbyCode}`);
+    console.log(`User ${username} requested lobby info for lobby code ${lobbyCode}`);
     const lobbyData = lobbies.get(lobbyCode);
     if (!lobbyData) {
       socket.emit("lobby_info_error", "Lobby not found");
@@ -171,7 +173,7 @@ io.on("connection", (socket: TypedSocket) => {
       return;
     }
     socket.emit("lobby_info", lobbyData);
-    console.log(`Lobby data sent to user ${userId}:`, lobbyData);
+    console.log(`Lobby data sent to user ${username}:`, lobbyData);
   });
 
   // handle join lobby
@@ -179,28 +181,28 @@ io.on("connection", (socket: TypedSocket) => {
 
   // Handle game moves
   socket.on("game_move", (gameCode, move) => {
-    console.log(`User ${userId} made a move in game ${gameCode}:`, move);
+    console.log(`User ${username} made a move in game ${gameCode}:`, move);
     const gameData = games.get(gameCode);
     if (!gameData) {
-      console.log(`Game not found for user ${userId}`);
+      console.log(`Game not found for user ${username}`);
       socket.emit("game_move_error", "Game not found");
       return;
     }
     const inGame = wsState.gameCode === gameCode;
     if (!inGame) {
-      console.log(`User ${userId} is not in the game`);
+      console.log(`User ${username} is not in the game`);
       socket.emit("game_move_error", "User is not in the game");
       return;
     }
     // check if it's the user's turn
     const playerIndex = gameData.players.findIndex((player) => player.userId === userId);
     if (playerIndex === -1) {
-      console.log(`User ${userId} is not in the game`);
+      console.log(`User ${username} is not in the game`);
       socket.emit("game_move_error", "User is not in the game");
       return;
     }
     if (gameData.playerTurn !== playerIndex) {
-      console.log(`It's not user ${userId}'s turn`);
+      console.log(`It's not user ${username}'s turn`);
       socket.emit("game_move_error", "It's not your turn");
       return;
     }
@@ -216,7 +218,7 @@ io.on("connection", (socket: TypedSocket) => {
 
     // Check if the move was made in time
     if (gameData.playerTimes[gameData.playerTurn] <= 0) {
-      console.log(`User ${userId} took too long to make a move!`);
+      console.log(`User ${username} took too long to make a move!`);
       socket.emit("game_move_error", "Time's up!");
       return;
     }
@@ -244,8 +246,8 @@ io.on("connection", (socket: TypedSocket) => {
     createGameTimeout(gameData);
 
     // Find the connection for both players
-    const player1Key = getWsKey(gameData.players[0].userId);
-    const player2Key = getWsKey(gameData.players[1].userId);
+    const player1Key = getWsKey(gameData.players[0].username);
+    const player2Key = getWsKey(gameData.players[1].username);
     const player1State = connections.get(player1Key);
     const player2State = connections.get(player2Key);
 

@@ -1,16 +1,18 @@
 import { Socket } from "socket.io";
 import { GameConfig, GameInterface, GameTypeEnum } from "./games";
 
-// ws:userid
+// ws:username
 export type WSID = string;
 
 export interface PlayerData {
     userId: number; // ID of the player
     name: string; // Name of the player
+    username: string; // Username of the player
 }
 
 export interface PublicPlayerData {
     name: string; // Name of the player
+    username: string; // Username of the player
 }
 
 // internal state of the game board, along with metadata about the game
@@ -50,6 +52,7 @@ export interface WSState {
     socketId: string | null; // the socket ID of the connection
     userId: number;
     userEmail: string;
+    username: string;
     currentQueue: GameConfig | null; // the game the user is currently queued for
     currentLobby: string | null; // the game code of the current lobby
     gameCode: string | null; // the game code of the current game or lobby

@@ -9,8 +9,8 @@ import { Game, PublicGame } from "@/types/websocket";
 export function makePublicGame<GameState extends GameInterface<any, any>>(game: Game<GameState>): PublicGame<GameState> {
   let returnobject: PublicGame<GameState> = {
     players: [
-      { name: game.players[0].name },
-      { name: game.players[1].name },
+      { name: game.players[0].name, username: game.players[0].username },
+      { name: game.players[1].name, username: game.players[1].username },
     ],
     gameState: game.gameState,
     firstPlayer: game.firstPlayer,
