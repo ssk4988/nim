@@ -1,8 +1,4 @@
-import { PrismaClient } from "@prisma/client";
-import NextAuth, { NextAuthOptions, TokenInfo, User } from "next-auth";
-import GoogleProvider from "next-auth/providers/google";
-import CredentialsProvider from "next-auth/providers/credentials";
-import jwt from "jsonwebtoken";
+import NextAuth from "next-auth";
 import { localAuthOptions } from "../authoptions";
 
 

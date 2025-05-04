@@ -61,7 +61,7 @@ function SignUpWrapped() {
         });
         if (res.ok) {
             addSnackbarMessage({ text: "Account created successfully", duration: 5000 });
-            // Log in the user with FakeCredentials
+            // Log in the user with Fake Credentials
             const loginResponse = await signIn("credentials", {
                 email, // Pass the email
                 token, // Pass the token
