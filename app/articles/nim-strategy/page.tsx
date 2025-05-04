@@ -30,8 +30,8 @@ There are a few more interesting properties of xor:
 - $a \\oplus b = b \\oplus a$ (xor is commutative)
 - Each bit of the result is the xor of the corresponding bits of the inputs. This is inherent in the definition
 of xor but is worth noting.
-### Nim-Sum
-What does this have to do with Nim? The xor of the sizes of the piles is called the nim-sum. 
+### Strategy
+What does this have to do with Nim? The xor of the sizes of the piles is called the **nim-sum**. 
 The nim-sum is a powerful tool for determining the winning strategy in Nim.  
 Here's an example of the calculation of the nim-sum:
 - Suppose we have the following piles: $[4, 1, 5, 3]$.
@@ -44,6 +44,12 @@ Here's an example of the calculation of the nim-sum:
   - $101_2 \\oplus 101_2 = 000_2$ (which is 0)
   - $000_2 \\oplus 011_2 = 011_2$ (which is 3)
 - So the nim-sum is $3$.
+  
+Determining winning and losing positions is simple:
+- If the nim-sum is $0$, then the position is a losing position for the player whose turn it is.
+- If the nim-sum is not $0$, then the position is a winning position for the player whose turn it is.
+
+
 `;
 export default function NimStrategy() {
     return <div className="m-4"><MarkdownWrapper content={content} /></div>;

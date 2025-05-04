@@ -15,6 +15,7 @@ When it is your turn, you can click a stone from a pile, and every stone in that
 the clicked stone (including the clicked stone) will be removed. Hovering over a stone will highlight
 the stones that will be removed if you click that stone.
   
+Try out the hovering below!
   
 [dummy-nim]
 `;
