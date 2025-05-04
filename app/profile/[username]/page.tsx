@@ -1,18 +1,32 @@
 'use client';
 import { signOut } from "next-auth/react";
 import { use, useEffect, useState } from "react";
-import { User } from "@/types/user";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { liveGameTypes, liveTimeControlTypes } from "@/websocket/game-util";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { displayGameType, displayTimeControl } from "@/types/games";
 import LoadingScreen from "@/components/ui/loading";
+import { useSnackbar } from "@/components/snackbar";
+import { UserProfile } from "@/types/user";
+
+function NotFoundProfile() {
+    return (
+        <div className="container mx-auto flex min-h-[calc(100vh-200px)] items-center justify-center px-4 py-12">
+            <div className="text-center">
+                <p className="text-lg font-semibold">Profile not found</p>
+            </div>
+        </div>
+    )
+}
 
 export default function Profile() {
+    const params = useParams();
+    const username = params.username as string;
     const [isLoading, setIsLoading] = useState(true);
-    const [profile, setProfile] = useState<User | null>(null);
-    const router = useRouter();
+    const [profile, setProfile] = useState<UserProfile | null>(null);
+    const { addSnackbarMessage } = useSnackbar();
+    if (!username) return <NotFoundProfile />;
 
     const handleLogout = async () => {
         setIsLoading(true);
@@ -22,10 +36,14 @@ export default function Profile() {
     useEffect(() => {
         const fetchProfile = async () => {
             const response = await fetch("/api/profile", {
-                method: "GET",
+                method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
+                body: JSON.stringify({
+                    username: username,
+                }),
+                credentials: "include",
             });
 
             if (response.ok) {
@@ -33,7 +51,8 @@ export default function Profile() {
                 setProfile(data);
                 console.log("Profile data: ", data);
             } else {
-                console.error("Failed to fetch profile");
+                addSnackbarMessage({ text: response.statusText, error: true, duration: 5000 });
+                console.error("Failed to fetch profile: ", response.statusText);
             }
             setIsLoading(false);
         };
@@ -44,13 +63,7 @@ export default function Profile() {
         return <LoadingScreen text="Loading profile..." />;
     }
     if (!profile) {
-        return (
-            <div className="container mx-auto flex min-h-[calc(100vh-200px)] items-center justify-center px-4 py-12">
-                <div className="text-center">
-                    <p className="text-lg font-semibold">Profile not found</p>
-                </div>
-            </div>
-        )
+        return <NotFoundProfile />;
     }
     const createdat = new Date(profile.createdat);
     // format data as Month Year
@@ -85,7 +98,6 @@ export default function Profile() {
                 <div>
                     <p className="text-3xl font-bold">{profile.username}</p>
                     <p className="text-lg font-semibold">{profile.name}</p>
-                    <p className="text-muted-foreground">{profile.email}</p>
                     <p className="text-sm text-muted-foreground">Member since {formattedDate}</p>
                 </div>
                 <Button variant="outline" onClick={handleLogout}>

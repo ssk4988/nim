@@ -2,25 +2,30 @@ import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import { localAuthOptions } from "../auth/authoptions";
+import { isValidUsername, UserProfile } from "@/types/user";
 
 const prisma = new PrismaClient();
 
-
 // gets the user profile
-export async function GET(req: Request) {
-    const session = await getServerSession(localAuthOptions);
-    if (!session) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+export async function POST(req: Request) {
+    const requestBody = await req.json();
+    if (!("username" in requestBody)) {
+        return NextResponse.json({ error: "No username provided" }, { status: 400 });
     }
-    const user = session.user;
-    const userId = user.id;
+    const username = requestBody.username;
+    if (typeof username !== "string" || !isValidUsername(username)) {
+        return NextResponse.json({ error: "Invalid username" }, { status: 400 });
+    }
     const userProfile = await prisma.users.findUnique({
         where: {
-            userid: userId,
+            username: username,
         },
     });
     if (!userProfile) {
         return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
-    return NextResponse.json(userProfile, { status: 200 });
+    const { email, userid, ...untypedUserProfile } = userProfile;
+    const userProfileTyped: UserProfile = untypedUserProfile as UserProfile;
+    
+    return NextResponse.json(userProfileTyped, { status: 200 });
 }
