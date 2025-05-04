@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import { PrismaClient } from "@prisma/client";
-import { validEmail, validUsername } from "@/types/user";
+import { isValidEmail, isValidUsername } from "@/types/user";
 
 const prisma = new PrismaClient();
 
@@ -45,8 +45,8 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: "Invalid or expired token" }, { status: 401 });
     }
     console.log("Token is valid");
-    if (!validEmail(email)) return NextResponse.json({ error: "Invalid email" }, { status: 400 });
-    if (!validUsername(username)) return NextResponse.json({ error: "Invalid username" }, { status: 400 });
+    if (!isValidEmail(email)) return NextResponse.json({ error: "Invalid email" }, { status: 400 });
+    if (!isValidUsername(username)) return NextResponse.json({ error: "Invalid username" }, { status: 400 });
     const existingUser = await prisma.users.findUnique({
         where: {
             email,

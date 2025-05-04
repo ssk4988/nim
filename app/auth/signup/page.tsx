@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { validUsername } from "@/types/user";
+import { isValidUsername } from "@/types/user";
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
@@ -35,7 +35,7 @@ function SignUpWrapped() {
             setUsername(value);
             return;
         }
-        if (!validUsername(value)) {
+        if (!isValidUsername(value)) {
             addSnackbarMessage({ text: "Username can only contain letters, numbers, and underscores", error: true, duration: 5000 });
             return;
         }

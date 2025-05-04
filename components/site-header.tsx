@@ -12,10 +12,7 @@ import {
     NavigationMenuList,
     NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Menu } from "lucide-react"
 import { signIn, useSession } from "next-auth/react"
-import { Header } from "@radix-ui/themes/components/table"
 
 function HeaderButton({ href, name, pathname }: {
     href: string,
@@ -47,7 +44,7 @@ export function SiteHeader() {
 
     const profileButton = user ? (
         <Button variant="link" size="sm" asChild>
-            <Link href="/profile">{userName}</Link>
+            <Link href={`/profile/${userName}`}>{userName}</Link>
         </Button>
     ) : (
         <Button size="sm" variant="ghost" onClick={() => signIn("google", undefined, { prompt: "login" })}>
