@@ -8,9 +8,9 @@ import { Label } from "@/components/ui/label";
 import { validUsername } from "@/types/user";
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 
-export default function Signup() {
+function SignUpWrapped() {
     const searchParams = useSearchParams();
     const nameParam = searchParams.get("name");
     const { addSnackbarMessage } = useSnackbar();
@@ -139,4 +139,8 @@ export default function Signup() {
             </Card>
         </div>
     );
+}
+
+export default function Signup() {
+    return <Suspense><SignUpWrapped /></Suspense>
 }

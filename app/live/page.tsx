@@ -6,8 +6,6 @@ import { SocketContext } from "./socket-context";
 import { Lobby, PublicGame } from "@/types/websocket";
 import { useRouter } from "next/navigation";
 import { liveGameTypes, liveTimeControlTypes } from "@/websocket/game-util";
-import GameTile from "../games/game-tile";
-import { gameInfo } from "../games/page";
 import { useSnackbar } from "@/components/snackbar";
 import LoadingScreen from "@/components/ui/loading";
 import { Card } from "@radix-ui/themes";

@@ -9,6 +9,7 @@ export default function Home() {
         <h1 className="mb-4 text-4xl font-bold tracking-tight">Welcome to Nim Hub</h1>
         <p className="mx-auto mb-8 max-w-2xl text-lg text-muted-foreground">
           Challenge yourself with classic mathematical games and learn the principles of game theory.
+          Test Sentence - REMOVE THIS
         </p>
         <div className="flex justify-center gap-4">
           <Button asChild>

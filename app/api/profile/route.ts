@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { getServerSession } from "next-auth";
-import { authOptions } from "../auth/[...nextauth]/route";
+import { localAuthOptions } from "../auth/authoptions";
 
 const prisma = new PrismaClient();
 
 
 // gets the user profile
 export async function GET(req: Request) {
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession(localAuthOptions);
     if (!session) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
