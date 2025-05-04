@@ -6,9 +6,14 @@ import { flipGamePerspective, makePublicGame, shouldGameEnd, synchronizeGameTime
 import { connections, games, getWsKey, httpServer, io, lobbies } from "./init";
 import { clearQueueLobbyHandler, joinLobbyHandler, lobbyHandler, queueHandler } from "./queue-lobby";
 import { createGameTimeout, endGameRoom } from "./game-manager";
-dotenv.config();
+
+
+const envpath = `.env.${process.env.NODE_ENV}`;
+console.log("ENV Path:", envpath);
+dotenv.config({ path: envpath });
 
 const PORT = process.env.WS_PORT || 4000;
+const BASE_URL = process.env.BASE_URL || "http://localhost";
 
 // Middleware to check for authentication token
 io.use((socket: TypedSocket, next) => {
@@ -274,5 +279,5 @@ io.on("connection", (socket: TypedSocket) => {
 
 // Start the WebSocket server
 httpServer.listen(PORT, () => {
-  console.log(`WebSocket server running on http://localhost:${PORT}`);
+  console.log(`WebSocket server running on ${BASE_URL}:${PORT}`);
 });
