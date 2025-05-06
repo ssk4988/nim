@@ -193,10 +193,17 @@ body {
   background-color: rgba(0, 0, 0, 0.1);
 }
 
+.stone-img {
+  background-image: url('/images/stone.png'); /* Set the background image */
+}
+
+.marble-img {
+  background-image: url('/images/marble.png'); /* Set the background image */
+}
+
 .stone-button {
   width: 2rem; /* Set the width using rem units */
   height: 2rem; /* Set the height using rem units */
-  background-image: url('/images/stone.png'); /* Set the background image */
   background-size: cover; /* Ensure the image covers the entire button */
   background-color: rgba(0, 0, 0, 0); /* Set the background color to transparent */
   background-position: center; /* Center the background image */

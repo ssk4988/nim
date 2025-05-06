@@ -8,7 +8,7 @@ export default function MarblesRenderer({ gameState, submitter }: { gameState: M
         stones.push(
             <button
                 key={i}
-                className={`stone-button ${disabled || i > gameState.maxMarblesPerTurn ? "no-hover" : ""}`}
+                className={`stone-button marble-img ${disabled || i > gameState.maxMarblesPerTurn ? "no-hover" : ""}`}
                 onClick={() => {
                     console.log("Clicked stone:", i);
                     if (disabled) return;
