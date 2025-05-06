@@ -16,7 +16,7 @@ export default function NimRenderer({ gameState, submitter }: { gameState: NimSt
             stones.push(
                 <button
                     key={i}
-                    className={`stone-button ${disabled ? "no-hover" : ""}`}
+                    className={`stone-button stone-img ${disabled ? "no-hover" : ""}`}
                     onClick={handler}
                     disabled={disabled}
                 ></button>
