@@ -3,7 +3,7 @@ import MarkdownWrapper from "../markdown-wrapper";
 const content = `
 ## How to Play Nim
 ### Rules
-Nim is a two-player game of strategy in which players take turns removing stones from distinct piles.
+Nim is a two-player game in which players take turns removing stones from distinct piles.
 Specifically, in one turn, a player must remove at least one stone from a single pile, but can remove
 as many stones as they want from that pile.
 The objective of the game is to be the player who removes the last stone.

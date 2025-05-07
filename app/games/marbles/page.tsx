@@ -98,7 +98,7 @@ export default function MarblesPlayer() {
     let sidebar = <GameSidebar open={sidebarOpen} onOpenChange={setSidebarOpen}>
         <h2 className="text-lg font-bold">Rules</h2>
         <p>
-            Players take turns removing 1 to {board.maxMarblesPerTurn} stones from a pile of stones. The player who takes the last stone wins.
+            Players take turns removing 1 to {board.maxMarblesPerTurn} marbles from a pile of marbles. The player who takes the last marble wins.
         </p>
     </GameSidebar>
 

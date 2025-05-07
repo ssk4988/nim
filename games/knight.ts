@@ -59,8 +59,5 @@ for (let diagonal = boardSize + boardSize - 2; diagonal >= 0; diagonal--) {
     }
 }
 
-console.log("Shortest path precomputed: ", shortestPath);
-console.log("Grundy values precomputed: ", grundyValues);
-
 export const knightGrundyValues = grundyValues;
 export const knightShortestPath = shortestPath;
