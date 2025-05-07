@@ -8,7 +8,7 @@ state of the game at all times. Additionally the games are *deterministic*, mean
 outcome of the game is completely determined by the players' moves, and there is no element of
 chance. This is in contrast to games like poker, where players do not know the cards of their
 opponents, and there is an element of chance in the form of the shuffled deck.  
-This site hones in on games that the **Sprague-Grundy Theorem** applies to (more on this in another article). 
+This site hones in on games that the [**Sprague-Grundy Theorem**](/articles/sprague-grundy) applies to (more on this later). 
 Some additional properties of this class of games are:
 - There are two players.
 - Each player takes turns making moves.
@@ -29,14 +29,6 @@ and each edge is a possible move that leads to a new state. The game ends when a
 there are no possible moves left. The terminal states are the leaves of the DAG.
 - Every state of the game can be classified as either a winning state or a losing state. A winning state
 is a state where the player whose turn it is can force a win, while a losing state is a state where the player whose turn it is cannot force a win.
-  
-The most fundamental task is determining whether a given state is winning or losing. Since the game is
-finite, this can be done by recursively exploring the graph. First, any state with no moves out of it 
-is a **losing** state. A state is a **winning** state if there is at least one move that leads directly
-to a losing state. The reason for this is that the opponent
-is forced to play from a losing state, and therefore cannot win. Conversely, a state is a **losing** state if
-all possible moves lead to winning states (no moves lead to losing states). This definition encompasses the
-'no moves left' case as well.
 `;
 export default function Introduction() {
     return <div className="m-4"><MarkdownWrapper content={content} /></div>;
