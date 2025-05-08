@@ -9,7 +9,9 @@ const articles = [
     { title: "Marbles: Strategy", slug: "marbles-strategy" },
     { title: "How to Play Nim", slug: "nim-how" },
     { title: "Nim: Strategy", slug: "nim-strategy" },
-    // { title: "Sprague-Grundy Theorem", slug: "sprague-grundy-theorem" },
+    { title: "How to Play Lone Knight", slug: "loneknight-how" },
+    { title: "Lone Knight: Strategy", slug: "loneknight-strategy" },
+    { title: "Sprague-Grundy Theorem", slug: "sprague-grundy" },
 
 ];
 

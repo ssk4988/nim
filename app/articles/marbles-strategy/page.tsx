@@ -5,8 +5,7 @@ const content = `
 ### Determining Winning and Losing States
 You can determine the strategy for the game of Marbles by determining the winning and losing states.
 In the following table, the moves column shows how many marbles you can remove and whether the resulting 
-state is winning (W) or losing (L).
-Consider the following table of states:
+state is winning (W) or losing (L):
 | Number of Marbles | Winning State? | Moves | Winning Move |
 |-------------------|----------------|-------|--------------|
 | 0 | No | | |

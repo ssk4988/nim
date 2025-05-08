@@ -7,7 +7,7 @@ import { GameMenu } from "../game-menu";
 import { GameSidebar } from "../game-sidebar";
 import TurnPrompt from "../turn-prompt";
 import MarblesRenderer from "./marbles-renderer";
-import { computerThinkingTime } from "@/lib/constants";
+import { computerThinkingTime, DEBUG } from "@/lib/constants";
 
 export default function MarblesPlayer() {
     const { data: session } = useSession();
@@ -33,10 +33,12 @@ export default function MarblesPlayer() {
     }, [board, pickedSide]);
 
     // Print out game state for debugging
-    useEffect(() => {
-        console.log("Game State: ", board);
-        console.log("Grundy Value: ", board.grundyValue());
-    }, [board]);
+    if (DEBUG) {
+        useEffect(() => {
+            console.log("Game State: ", board);
+            console.log("Grundy Value: ", board.grundyValue());
+        }, [board]);
+    }
 
     let marblesRenderer = <MarblesRenderer gameState={board} submitter={(move) => {
         const newBoard = board.clone();

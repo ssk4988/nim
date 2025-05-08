@@ -27,8 +27,9 @@ initial state of the game. This means that if one player has a winning strategy,
 - The game can be represented as a directed acyclic graph (DAG), where each node is a state of the game, 
 and each edge is a possible move that leads to a new state. The game ends when a player reaches a terminal state, which is a state where
 there are no possible moves left. The terminal states are the leaves of the DAG.
-- Every state of the game can be classified as either a winning state or a losing state. A winning state
-is a state where the player whose turn it is can force a win, while a losing state is a state where the player whose turn it is cannot force a win.
+- Every state of the game can be classified as either a winning state or a losing state. A **winning state**
+is a state where the player whose turn it is can force a win with optimal play. A **losing state**
+is a state where the player whose turn it is cannot force a win and loses under optimal play.
 `;
 export default function Introduction() {
     return <div className="m-4"><MarkdownWrapper content={content} /></div>;

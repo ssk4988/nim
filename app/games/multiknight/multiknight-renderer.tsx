@@ -1,3 +1,4 @@
+import Chessboard, { CellInfo } from "@/components/ui/chessboard";
 import { knightDirections, knightValidMoves } from "@/games/knight";
 import { MultiKnightState } from "@/games/multiknight";
 import { cn } from "@/lib/utils";
@@ -25,15 +26,14 @@ export default function MultiKnightRenderer({ gameState, selectedCell, submitter
             }
         });
     }
-    let rows = [];
+    let rows: CellInfo[][] = [];
     for (let i = 0; i < MultiKnightState.boardHeight; i++) {
-        let row = [];
+        let row: CellInfo[] = [];
         for (let j = 0; j < MultiKnightState.boardWidth; j++) {
             let hasKnight = gameState.grid[i][j] > 0;
             let isMoveSpot = moveSpots.some(spot => spot.row === i && spot.col === j);
-            let cellClassName = "w-8 h-8 border flex items-center justify-center select-none";
             let tileStyle = "bg-board-square hover:bg-board-square-hover";
-            let cell = null;
+            let cell = undefined;
             let cellAction = undefined; 
             if (isMoveSpot) {
                 let direction = moveSpots.find(spot => spot.row === i && spot.col === j)!.direction;
@@ -59,12 +59,13 @@ export default function MultiKnightRenderer({ gameState, selectedCell, submitter
             } else if (moveSpots.some(spot => spot.row === i && spot.col === j)) {
                 cell = "•";
             }
-            cellClassName = cn(cellClassName, tileStyle);
-            row.push(<div key={`${i}-${j}`} className={cellClassName} onClick={cellAction}>{cell}</div>);
+            row.push({
+                tileStyle: tileStyle,
+                inner: cell,
+                cellAction: cellAction
+            });
         }
-        rows.push(<div key={i} className="flex">{row}</div>);
+        rows.push(row);
     }
-    return <div className="flex flex-col border-2">
-        {rows}
-    </div>;
+    return <Chessboard cells={rows} />;
 }
