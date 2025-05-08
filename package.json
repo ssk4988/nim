@@ -7,8 +7,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "ws:dev": "set NODE_ENV=development && tsx websocket/server.ts",
-    "ws:prod": "set NODE_ENV=production && tsx websocket/server.ts",
+    "ws:dev": "cross-env NODE_ENV=development tsx websocket/server.ts",
+    "ws:prod": "cross-env NODE_ENV=production tsx websocket/server.ts",
     "lint": "next lint"
   },
   "dependencies": {
@@ -40,6 +40,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "cross-env": "^7.0.3",
     "tailwindcss": "^4",
     "tsx": "^4.19.3",
     "typescript": "^5"
