@@ -62,9 +62,9 @@ export function SiteHeader() {
 
                 <NavigationMenu className="hidden md:ml-auto md:flex">
                     <NavigationMenuList>
-                        <HeaderButton href="/live" name="Live" pathname={pathname} />
-                        <HeaderButton href="/games" name="Games" pathname={pathname} />
                         <HeaderButton href="/articles" name="Articles" pathname={pathname} />
+                        <HeaderButton href="/games" name="Games" pathname={pathname} />
+                        <HeaderButton href="/live" name="Live" pathname={pathname} />
                     </NavigationMenuList>
                 </NavigationMenu>
 

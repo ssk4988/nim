@@ -8,8 +8,7 @@ export default function Home() {
       <section className="mb-12 text-center">
         <h1 className="mb-4 text-4xl font-bold tracking-tight">Welcome to Nim Games</h1>
         <p className="mx-auto mb-8 max-w-2xl text-lg text-muted-foreground">
-          Challenge yourself with classic mathematical games and learn the principles of game theory.
-          Test Sentence - REMOVE THIS
+          Challenge yourself with classic combinatorial games and learn the principles of game theory.
         </p>
         <div className="flex justify-center gap-4">
           <Button asChild>

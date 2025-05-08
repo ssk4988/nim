@@ -13,10 +13,16 @@ export const prisma = new PrismaClient();
 // Create an HTTP server for the WebSocket server
 export const httpServer = createServer();
 
+const origins = [
+  "http://localhost:3000", // Local development
+  "https://nimgames.net", // Production
+  "https://www.nimgames.net", // Production
+];
+
 // Initialize the WebSocket server
 export const io = new WebSocketServer({
   cors: {
-    origin: "*", // Allow all origins (adjust for production)
+    origin: origins,
     methods: ["GET", "POST"],
   },
 });
