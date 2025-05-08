@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import { TokenInfo } from "next-auth";
 import { TypedSocket, WSState } from "../types/websocket";
 import { flipGamePerspective, makePublicGame, shouldGameEnd, synchronizeGameTime } from "./game-util";
-import { connections, games, getWsKey, httpServer, io, lobbies } from "./init";
+import { connections, games, getWsKey, httpServer, io, lobbies, prisma } from "./init";
 import { clearQueueLobbyHandler, joinLobbyHandler, lobbyHandler, queueHandler } from "./queue-lobby";
 import { createGameTimeout, endGameRoom } from "./game-manager";
 
@@ -12,7 +12,7 @@ const envpath = `.env.${process.env.NODE_ENV}`;
 console.log("ENV Path:", envpath);
 dotenv.config({ path: envpath });
 
-const PORT = process.env.WS_PORT || 4000;
+const PORT = (process.env.WS_PORT && parseInt(process.env.WS_PORT)) || 4000;
 const BASE_URL = process.env.BASE_URL || "http://localhost";
 
 // Middleware to check for authentication token
@@ -278,6 +278,16 @@ io.on("connection", (socket: TypedSocket) => {
 
 
 // Start the WebSocket server
-httpServer.listen(PORT, () => {
-  console.log(`WebSocket server running on ${BASE_URL}:${PORT}`);
-});
+io.listen(PORT);
+console.log(`WebSocket server running on ${BASE_URL}:${PORT}`);
+
+
+// Graceful shutdown
+// process.on("SIGINT", async () => {
+//   console.log("Shutting down...");
+//   await prisma.$disconnect(); // Disconnect Prisma
+//   httpServer.close(() => {
+//     console.log("HTTP server closed");
+//     process.exit(0);
+//   });
+// });

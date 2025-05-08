@@ -14,7 +14,7 @@ export const prisma = new PrismaClient();
 export const httpServer = createServer();
 
 // Initialize the WebSocket server
-export const io = new WebSocketServer(httpServer, {
+export const io = new WebSocketServer({
   cors: {
     origin: "*", // Allow all origins (adjust for production)
     methods: ["GET", "POST"],
