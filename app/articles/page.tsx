@@ -12,6 +12,8 @@ const articles = [
     { title: "How to Play Lone Knight", slug: "loneknight-how" },
     { title: "Lone Knight: Strategy", slug: "loneknight-strategy" },
     { title: "Sprague-Grundy Theorem", slug: "sprague-grundy" },
+    { title: "How to Play Multi Knight", slug: "multiknight-how" },
+    { title: "Multi Knight: Strategy", slug: "multiknight-strategy" },
 
 ];
 

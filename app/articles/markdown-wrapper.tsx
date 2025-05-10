@@ -1,17 +1,9 @@
-import { NimState } from '@/games/nim';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import "katex/dist/katex.min.css"; // Import KaTeX styles
-import NimRenderer from '../games/nim/nim-renderer';
 import Link from 'next/link';
-import { MarblesState } from '@/games/marbles';
-import MarblesRenderer from '../games/marbles/marbles-renderer';
-import { LoneKnightState } from '@/games/loneknight';
-import LoneKnightRenderer from '../games/loneknight/loneknight-renderer';
-import Chessboard, { CellInfo } from '@/components/ui/chessboard';
-import { knightGrundyValues } from '@/games/knight';
 
 export default function MarkdownWrapper({ content }: { content: string }) {
     return <ReactMarkdown
@@ -28,54 +20,7 @@ export default function MarkdownWrapper({ content }: { content: string }) {
             th: ({ node, ...props }) => <th className="border border-foreground px-4 py-2" {...props} />,
             td: ({ node, ...props }) => <td className="border border-foreground px-4 py-2" {...props} />,
             a: ({ node, href, ...props }) => <Link href={href!} className='text-accent hover:underline' {...props} />,
-            p: ({ node, children, ...props }) => {
-                // Check for custom components
-                if (children && typeof children === 'string' && children === '[dummy-nim]') {
-                    const nimState = new NimState([4, 1, 5, 3], true);
-                    return <NimRenderer gameState={nimState} />;
-                }
-                if (children && typeof children === 'string' && children === '[dummy-marbles]') {
-                    const marblesState = new MarblesState(10, true);
-                    return <MarblesRenderer gameState={marblesState} />;
-                }
-                if (children && typeof children === 'string' && children === '[knight-moves]') {
-                    const loneKnightState = new LoneKnightState({ row: 2, col: 2 }, true);
-                    return <LoneKnightRenderer gameState={loneKnightState} />;
-                }
-                if (children && typeof children === 'string' && children === '[knight-corner]') {
-                    let rows: CellInfo[][] = [];
-                    for (let i = 0; i < LoneKnightState.boardHeight; i++) {
-                        let row: CellInfo[] = [];
-                        for (let j = 0; j < LoneKnightState.boardWidth; j++) {
-                            const bad = (i + 2 >= LoneKnightState.boardHeight && j + 2 >= LoneKnightState.boardWidth);
-                            row.push({
-                                tileStyle: "bg-board-square",
-                                inner: bad ? "L" : ""
-                            });
-                        }
-                        rows.push(row);
-                    }
-                    return <Chessboard cells={rows} />;
-                }
-                if (children && typeof children === 'string' && children === '[knight-winlose]') {
-                    let rows: CellInfo[][] = [];
-                    for (let i = 0; i < LoneKnightState.boardHeight; i++) {
-                        let row: CellInfo[] = [];
-                        for (let j = 0; j < LoneKnightState.boardWidth; j++) {
-                            const bad = knightGrundyValues[i][j] === 0;
-                            row.push({
-                                tileStyle: "bg-board-square",
-                                inner: bad ? "L" : "W"
-                            });
-                        }
-                        rows.push(row);
-                    }
-                    return <Chessboard cells={rows} />;
-                }
-
-
-                return <p {...props}>{children}</p>
-            },
+            p: ({ node, children, ...props }) => <p {...props}>{children}</p>
         }}
     >
         {content}

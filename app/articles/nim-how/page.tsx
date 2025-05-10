@@ -1,4 +1,6 @@
+import NimRenderer from "@/app/games/nim/nim-renderer";
 import MarkdownWrapper from "../markdown-wrapper";
+import { NimState } from "@/games/nim";
 
 const content = `
 ## How to Play Nim
@@ -17,8 +19,11 @@ the stones that will be removed if you click that stone.
   
 Try out the hovering below!
   
-[dummy-nim]
 `;
 export default function HowToPlayNim() {
-    return <div className="m-4"><MarkdownWrapper content={content} /></div>;
+    const nimState = new NimState([4, 1, 5, 3], true);
+    return <div className="m-4">
+        <MarkdownWrapper content={content} />
+        <NimRenderer gameState={nimState} />;
+    </div>;
 }

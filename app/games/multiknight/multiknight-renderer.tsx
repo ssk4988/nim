@@ -9,7 +9,7 @@ import { SetStateAction } from "react";
 export interface MultiKnightRendererProps {
     gameState: MultiKnightState;
     selectedCell: Cell | null;
-    submitter: (move: MultiKnightMove) => void;
+    submitter?: (move: MultiKnightMove) => void;
     setSelectedCell: (value: SetStateAction<Cell | null>) => void;
 }
 
@@ -38,7 +38,7 @@ export default function MultiKnightRenderer({ gameState, selectedCell, submitter
             if (isMoveSpot) {
                 let direction = moveSpots.find(spot => spot.row === i && spot.col === j)!.direction;
                 let move: MultiKnightMove = { row: selectedCell!.row, col: selectedCell!.col, direction };
-                cellAction = () => { submitter(move); }
+                cellAction = submitter ? () => { submitter(move); } : undefined;
                 tileStyle = "cursor-pointer bg-board-square-action hover:bg-board-square-action-hover";
             } else if (hasKnight) {
                 cellAction = () => {

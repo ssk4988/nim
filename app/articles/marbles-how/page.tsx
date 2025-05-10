@@ -1,4 +1,6 @@
+import MarblesRenderer from "@/app/games/marbles/marbles-renderer";
 import MarkdownWrapper from "../markdown-wrapper";
+import { MarblesState } from "@/games/marbles";
 
 const content = `
 ## How to Play Marbles
@@ -16,8 +18,11 @@ the number of marbles that will be removed is capped at 3.
   
 Try out the hovering below!
   
-[dummy-marbles]
 `;
 export default function HowToPlayMarbles() {
-    return <div className="m-4"><MarkdownWrapper content={content} /></div>;
+    const marblesState = new MarblesState(10, true);
+    return <div className="m-4">
+        <MarkdownWrapper content={content} />
+        <MarblesRenderer gameState={marblesState} />;
+    </div>;
 }
