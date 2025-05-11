@@ -26,12 +26,12 @@ export default function LoneKnightRenderer({ gameState, submitter }: LoneKnightR
         let row: CellInfo[] = [];
         for (let j = 0; j < LoneKnightState.boardWidth; j++) {
             let isKnight = i === gameState.knightPosition.row && j === gameState.knightPosition.col;
-            let tileStyle = "bg-board-square hover:bg-board-square-hover";
+            let tileStyle = "bg-board-square hover:bg-board-square/50";
             let cell = undefined;
             let cellAction = undefined;
             if (isKnight) {
                 cell = "♞";
-                tileStyle = "cursor-default bg-board-square-piece hover:bg-board-square-piece-hover";
+                tileStyle = "cursor-default bg-board-square hover:bg-board-square/50";
             } else if (moveSpots.some(spot => spot.row === i && spot.col === j)) {
                 let direction = moveSpots.find(spot => spot.row === i && spot.col === j)!.direction;
                 cellAction = submitter ? () => {
@@ -39,7 +39,7 @@ export default function LoneKnightRenderer({ gameState, submitter }: LoneKnightR
                     submitter(move);
                 } : undefined;
                 cell = "•";
-                tileStyle = "cursor-pointer bg-board-square-action hover:bg-board-square-action-hover";
+                tileStyle = "cursor-pointer bg-board-square-action hover:bg-board-square-action/80";
             }
             row.push({
                 tileStyle: tileStyle,

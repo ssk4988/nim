@@ -61,7 +61,7 @@ export default function LobbyPage() {
     if (!loaded) {
         return <LoadingScreen text="Loading lobby..." />;
     }
-    return <div className="container mx-auto flex flex-col items-center relative" style={{ height: "calc(99.9vh - var(--navbar-height))" }}>
+    return <div className="container mx-auto flex flex-col items-center relative pt-8" style={{ height: "calc(99.9vh - var(--navbar-height))" }}>
         <Card>
             <CardHeader>
                 <CardTitle>Lobby Code: {lobbyData.lobbyCode}</CardTitle>

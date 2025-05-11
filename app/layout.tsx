@@ -37,7 +37,7 @@ export default function RootLayout({
         <body
           className={inter.className}
         >
-          <ThemeProvider>
+          <ThemeProvider enableSystem={false}>
             <SnackbarProvider>
               <div className="relative flex min-h-screen flex-col">
                 <SiteHeader />

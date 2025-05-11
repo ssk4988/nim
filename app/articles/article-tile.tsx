@@ -1,5 +1,5 @@
 'use client';
-import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface ArticleTileProps {
     title: string;

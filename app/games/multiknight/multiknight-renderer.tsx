@@ -32,14 +32,14 @@ export default function MultiKnightRenderer({ gameState, selectedCell, submitter
         for (let j = 0; j < MultiKnightState.boardWidth; j++) {
             let hasKnight = gameState.grid[i][j] > 0;
             let isMoveSpot = moveSpots.some(spot => spot.row === i && spot.col === j);
-            let tileStyle = "bg-board-square hover:bg-board-square-hover";
+            let tileStyle = "bg-board-square hover:bg-board-square/50";
             let cell = undefined;
             let cellAction = undefined; 
             if (isMoveSpot) {
                 let direction = moveSpots.find(spot => spot.row === i && spot.col === j)!.direction;
                 let move: MultiKnightMove = { row: selectedCell!.row, col: selectedCell!.col, direction };
                 cellAction = submitter ? () => { submitter(move); } : undefined;
-                tileStyle = "cursor-pointer bg-board-square-action hover:bg-board-square-action-hover";
+                tileStyle = "cursor-pointer bg-board-square-action hover:bg-board-square-action/80";
             } else if (hasKnight) {
                 cellAction = () => {
                     if (isPlayerTurn) {
@@ -49,7 +49,10 @@ export default function MultiKnightRenderer({ gameState, selectedCell, submitter
                         });
                     }
                 }
-                tileStyle = "cursor-pointer bg-board-square-piece hover:bg-board-square-piece-hover";
+                tileStyle = "cursor-pointer bg-board-square hover:bg-board-square/50";
+            }
+            if (selectedCell?.row === i && selectedCell?.col === j) {
+                tileStyle = "cursor-pointer bg-board-square-piece/80 hover:bg-board-square-piece/50";
             }
             if (hasKnight) {
                 cell = <div>

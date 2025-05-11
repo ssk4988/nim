@@ -1,34 +1,72 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+
+  /* leaf colors */
+  --leaf-50: #f3f9ec;
+  --leaf-100: #e5f0d7;
+  --leaf-200: #cce3b3;
+  --leaf-300: #abd185;
+  --leaf-400: #8dbc5f;
+  --leaf-500: #6fa141;
+  --leaf-600: #4f772d;
+  --leaf-700: #426229;
+  --leaf-800: #384f25;
+  --leaf-900: #314423;
+  --leaf-950: #17240f;
+
+
+  --background: var(--leaf-50);
+  /* Background color */
+  --foreground: var(--leaf-950);
+  /* Text color */
   --navbar-height: 4rem;
-  --primary: #1d4ed8; /* Primary button background color */
-  --primary-foreground: #ffffff; /* Primary button text color */
-  --destructive: #dc2626; /* Destructive button background color */
-  --destructive-foreground: #ffffff; /* Destructive button text color */
-  --secondary: #6b7280; /* Secondary button background color */
-  --secondary-foreground: #ffffff; /* Secondary button text color */
-  --accent: #3b82f6; /* Accent color for hover states */
-  --accent-foreground: #ffffff; /* Accent foreground color */
-  --ring: #3b82f6; /* Focus ring color */
-  --ring-offset-background: var(--background); /* Ring offset background */
-  --card: #ffffff; /* Card background color */
-  --card-foreground: #171717; /* Card text color */
-  --muted-foreground: #535760; /* Muted text color */
-  --popover: #f9fafb; /* Popover background color */
-  --popover-foreground: #171717; /* Popover text color */
-  --input: #535760; /* Input border color */
-  --input-foreground: #171717; /* Input text color */
+  --primary: var(--leaf-500);
+  /* Primary button background color */
+  --primary-foreground: #ffffff;
+  /* Primary button text color */
+  --destructive: #dc2626;
+  /* Destructive button background color */
+  --destructive-foreground: #ffffff;
+  /* Destructive button text color */
+  --secondary: #6b7280;
+  /* Secondary button background color */
+  --secondary-foreground: #ffffff;
+  /* Secondary button text color */
+  --accent: var(--leaf-400);
+  /* Accent color for hover states */
+  --accent-foreground: #ffffff;
+  /* Accent foreground color */
+  --ring: var(--leaf-300);
+  /* Focus ring color */
+  --ring-offset-background: var(--background);
+  /* Ring offset background */
+  --card: var(--leaf-100);
+  /* Card background color */
+  --card-foreground: #171717;
+  /* Card text color */
+  --muted-foreground: #535760;
+  /* Muted text color */
+  --popover: #f9fafb;
+  /* Popover background color */
+  --popover-foreground: #171717;
+  /* Popover text color */
+  --input: #535760;
+  /* Input border color */
+  --input-foreground: #171717;
+  /* Input text color */
 
   /* board styling */
-  --board-square: #f0f0f0; /* Board square color */
-  --board-square-hover: #e0e0e0; /* Board square hover color */
-  --board-square-piece: #545fef; /* Board square active color */
-  --board-square-piece-hover: #5c97f5; /* Board square active hover color */
-  --board-square-action: #3bf679; /* Board square action color */
-  --board-square-action-hover: #85fcac; /* Board square action hover color */
+  /* Board square color */
+  --board-square: var(--leaf-200);
+  /* Board square active color */
+  --board-square-piece: var(--secondary);
+  /* Board square active hover color */
+  --board-square-piece-hover: #5c97f5;
+  /* Board square action color */
+  --board-square-action: var(--primary);
+  /* Board square action hover color */
+  --board-square-action-hover: #85fcac;
 }
 
 /* @theme inline {
@@ -54,80 +92,97 @@
     from {
       transform: translateX(-100%);
     }
+
     to {
       transform: translateX(0);
     }
   }
-  
+
   @keyframes slide-out-to-left {
     from {
       transform: translateX(0);
     }
+
     to {
       transform: translateX(-100%);
     }
   }
-  
+
   @keyframes slide-in-from-right {
     from {
       transform: translateX(100%);
     }
+
     to {
       transform: translateX(0);
     }
   }
+
   @keyframes slide-out-to-right {
     from {
       transform: translateX(0);
     }
+
     to {
       transform: translateX(100%);
     }
   }
+
   @keyframes slide-in-from-top {
     from {
       transform: translateY(-100%);
     }
+
     to {
       transform: translateY(0);
     }
   }
+
   @keyframes slide-out-to-top {
     from {
       transform: translateY(0);
     }
+
     to {
       transform: translateY(-100%);
     }
   }
+
   @keyframes slide-in-from-bottom {
     from {
       transform: translateY(100%);
     }
+
     to {
       transform: translateY(0);
     }
   }
+
   @keyframes slide-out-to-bottom {
     from {
       transform: translateY(0);
     }
+
     to {
       transform: translateY(100%);
     }
   }
+
   @keyframes fade-in {
     from {
       opacity: 0;
     }
+
     to {
       opacity: 1;
     }
   }
+
   @keyframes fade-out {
     from {
       opacity: 1;
     }
+
     to {
       opacity: 0;
     }
@@ -173,20 +228,20 @@
 
 body {
   background: var(--background);
-  color: var(--foreground);
+  /* color: var(--foreground); */
   font-family: Arial, Helvetica, sans-serif;
 }
 
 .icon-button {
   background-color: rgba(0, 0, 0, 0);
-    border-radius: 50%;
-    width: 3rem;
-    height: 3rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    transition: background-color 0.2s;
+  border-radius: 50%;
+  width: 3rem;
+  height: 3rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.2s;
 }
 
 .icon-button:hover {
@@ -194,45 +249,65 @@ body {
 }
 
 .stone-img {
-  background-image: url('/images/stone.png'); /* Set the background image */
+  background-image: url('/images/stone.png');
+  /* Set the background image */
 }
 
 .marble-img {
-  background-image: url('/images/marble.png'); /* Set the background image */
+  background-image: url('/images/marble.png');
+  /* Set the background image */
 }
 
 .stone-button {
-  width: 2rem; /* Set the width using rem units */
-  height: 2rem; /* Set the height using rem units */
-  background-size: cover; /* Ensure the image covers the entire button */
-  background-color: rgba(0, 0, 0, 0); /* Set the background color to transparent */
-  background-position: center; /* Center the background image */
-  border: none; /* Remove the default border */
-  border-radius: 50%; /* Make the button round */
+  width: 2rem;
+  /* Set the width using rem units */
+  height: 2rem;
+  /* Set the height using rem units */
+  background-size: cover;
+  /* Ensure the image covers the entire button */
+  background-color: rgba(0, 0, 0, 0);
+  /* Set the background color to transparent */
+  background-position: center;
+  /* Center the background image */
+  border: none;
+  /* Remove the default border */
+  border-radius: 50%;
+  /* Make the button round */
   margin: 0.1rem;
-  cursor: pointer; /* Change cursor to pointer on hover */
-  transition: transform 0.2s; /* Smooth transition for scaling */
+  cursor: pointer;
+  /* Change cursor to pointer on hover */
+  transition: transform 0.2s;
+  /* Smooth transition for scaling */
 }
 
-.stone-button:hover, .stone-button:hover ~ .stone-button {
-  transform: scale(1.1); /* Scale up the button on hover */
-  opacity: 0.9; /* Reduce opacity on hover */
+.stone-button:hover,
+.stone-button:hover~.stone-button {
+  transform: scale(1.1);
+  /* Scale up the button on hover */
+  opacity: 0.9;
+  /* Reduce opacity on hover */
   filter: sepia(1) saturate(5) hue-rotate(310deg) brightness(0.7);
 }
 
-.stone-button:hover, .stone-button:hover ~ .stone-button {
-  transform: scale(1.1); /* Scale up the button on hover */
-  opacity: 0.9; /* Reduce opacity on hover */
+.stone-button:hover,
+.stone-button:hover~.stone-button {
+  transform: scale(1.1);
+  /* Scale up the button on hover */
+  opacity: 0.9;
+  /* Reduce opacity on hover */
   filter: sepia(1) saturate(5) hue-rotate(310deg) brightness(0.7);
 }
 
-.stone-button.no-hover:hover, .stone-button:hover ~ .stone-button.no-hover {
+.stone-button.no-hover:hover,
+.stone-button:hover~.stone-button.no-hover {
   transform: none;
   opacity: 1;
   filter: none;
 }
 
 .stone-button:disabled {
-  opacity: 0.5; /* Make the button transparent */
-  cursor: not-allowed; /* Change cursor to not-allowed */
+  opacity: 0.5;
+  /* Make the button transparent */
+  cursor: not-allowed;
+  /* Change cursor to not-allowed */
 }
