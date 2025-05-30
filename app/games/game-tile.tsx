@@ -10,7 +10,7 @@ interface GameTileProps {
 
 export default function GameTile({ game, description, img, children }: GameTileProps) {
     const imgPath = `/images/${img}.png`;
-    return <Card className="flex flex-col items-center w-full">
+    return <Card className="flex flex-col items-center w-full h-full">
         <CardHeader className="flex flex-col items-center">
             <CardTitle>{game}</CardTitle>
             {description && <CardDescription>{description}</CardDescription>}

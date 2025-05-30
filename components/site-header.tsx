@@ -56,7 +56,7 @@ export function SiteHeader() {
         <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur">
             <div className="container flex h-16 items-center">
                 <Link href="/" className="flex items-center gap-2 ml-2">
-                    <Mountain className="h-5 w-5" />
+                    <img className="h-5 w-5" src="/images/nim.png" alt="Nim Games Logo" />
                     <span className="hidden font-bold sm:inline-block">Nim Games</span>
                 </Link>
 
