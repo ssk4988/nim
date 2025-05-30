@@ -16,7 +16,7 @@ export default function MarkdownWrapper({ content }: { content: string }) {
             h4: ({ node, ...props }) => <h4 className="text-md font-bold mt-4" {...props} />,
             ul: ({ node, ...props }) => <ul className="list-disc list-inside my-4" {...props} />,
             li: ({ node, ...props }) => <li className="list-disc list-inside" {...props} />,
-            table: ({ node, ...props }) => <table className="table-auto border-collapse border border-foreground" {...props} />,
+            table: ({ node, ...props }) => <table className="table-auto border-collapse border border-foreground my-4" {...props} />,
             th: ({ node, ...props }) => <th className="border border-foreground px-4 py-2" {...props} />,
             td: ({ node, ...props }) => <td className="border border-foreground px-4 py-2" {...props} />,
             a: ({ node, href, ...props }) => <Link href={href!} className='text-accent hover:underline' {...props} />,

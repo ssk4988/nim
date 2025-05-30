@@ -7,9 +7,9 @@ interface ArticleTileProps {
 };
 
 export default function ArticleTile({ title, children }: ArticleTileProps) {
-    return <Card className="flex flex-col items-center w-full">
-        <CardHeader className="flex flex-col items-center">
-            <CardTitle>{title}</CardTitle>
+    return <Card className="flex flex-col items-center justify-center w-full h-full">
+        <CardHeader className="flex flex-col">
+            <CardTitle className="text-center">{title}</CardTitle>
         </CardHeader>
         {children}
     </Card>

@@ -36,6 +36,8 @@ export default function HowToPlayMultiKnight() {
     const [selectedCell, setSelectedCell] = useState<Cell | null>(null);
     return <div className="m-4">
         <MarkdownWrapper content={content} />
-        <MultiKnightRenderer gameState={multiKnightState} selectedCell={selectedCell} setSelectedCell={setSelectedCell} />;
+        <div className="mt-4">
+            <MultiKnightRenderer gameState={multiKnightState} selectedCell={selectedCell} setSelectedCell={setSelectedCell} />
+        </div>
     </div>;
 }

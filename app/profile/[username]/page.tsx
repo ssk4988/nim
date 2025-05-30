@@ -108,7 +108,7 @@ export default function Profile() {
                 <h2>Total Games Played: {profile.games}</h2>
             </div>
             <div className="container mx-auto mt-8">
-                <h2 className="text-2xl font-bold">Live Game Statistics</h2>
+                <h2 className="text-2xl font-bold mb-4">Live Game Statistics</h2>
                 {gamesInfo.length > 0 ?
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                         {gamesInfo}

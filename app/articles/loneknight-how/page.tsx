@@ -22,7 +22,9 @@ export default function HowToPlayLoneKnight() {
     const loneKnightState = new LoneKnightState({ row: 2, col: 2 }, true);
     return <div className="m-4">
         <MarkdownWrapper content={content} />
-        <LoneKnightRenderer gameState={loneKnightState} />
+        <div className="my-4">
+            <LoneKnightRenderer gameState={loneKnightState} />
+        </div>
         <MarkdownWrapper content={content2} />
     </div>;
 }

@@ -55,7 +55,9 @@ export default function LoneKnightStrategy() {
     }
     return <div className="m-4">
         <MarkdownWrapper content={initialContent} />
-        <Chessboard cells={rows} />;
+        <div className="my-4">
+            <Chessboard cells={rows} />;
+        </div>
         <MarkdownWrapper content={initialContent2} />
         <Button onClick={() => setShowMore((previous) => !previous)} className="mt-4 mb-4">{showMore ? "Hide" : "Show"} More</Button>
         {showMore && <MarkdownWrapper content={hiddenContent} />}

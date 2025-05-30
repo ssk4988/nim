@@ -23,7 +23,7 @@ export default function Articles() {
             <ArticleTile {...article} />
         </Link>
     ));
-    return <div className="grid grid-cols-4 sm:grid-cols-4 gap-4">
+    return <div className="grid grid-cols-4 gap-4 auto-rows-fr p-4">
         {articleTiles}
     </div>
 }
