@@ -1,6 +1,7 @@
 'use client';
 
 import { useSnackbar } from "@/components/snackbar";
+import { DEBUG } from "@/lib/constants";
 import { ClientToServerEvents, ServerToClientEvents } from "@/types/websocket";
 import { useSession } from "next-auth/react";
 import React, { useEffect } from "react";
@@ -23,7 +24,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const token = session?.user?.token;
 
     useEffect(() => {
-        console.log("Connecting to WebSocket server at ", process.env.NEXT_PUBLIC_WEBSOCKET_URL);
+        if (DEBUG) console.log("Connecting to WebSocket server at ", process.env.NEXT_PUBLIC_WEBSOCKET_URL);
         if (!token) {
             console.error("No token found in session, not creating socket");
             return;
@@ -45,7 +46,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         setSocket(socketInstance);
         // cleanup function to disconnect the socket when the component unmounts
         return () => {
-            console.log("Socket disconnected");
+            if (DEBUG) console.log("Socket disconnected");
             socketInstance.disconnect();
             clearTimeout(connectionTimeout);
             setSocket(null);

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import { PrismaClient } from "@prisma/client";
 import { isValidEmail, isValidUsername } from "@/types/user";
+import { DEBUG } from "@/lib/constants";
 
 const prisma = new PrismaClient();
 
@@ -36,7 +37,7 @@ export async function POST(req: Request) {
     if (!isValidRequestBody(requestBody)) return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
 
     const { name, email, username, token } = requestBody;
-    console.log(name, email, token);
+    if (DEBUG) console.log(name, email, token);
 
     try {
         jwt.verify(token, process.env.JWT_SECRET!);

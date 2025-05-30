@@ -8,7 +8,7 @@ import { GameSidebar } from "../game-sidebar";
 import { cn } from "@/lib/utils";
 import { knightValidMoves, knightDirections } from "@/games/knight";
 import TurnPrompt from "../turn-prompt";
-import { computerThinkingTime } from "@/lib/constants";
+import { computerThinkingTime, DEBUG } from "@/lib/constants";
 import LoneKnightRenderer from "./loneknight-renderer";
 
 export default function LoneKnightPlayer() {
@@ -27,7 +27,7 @@ export default function LoneKnightPlayer() {
             let move = board.optimalMove();
             const newBoard = board.clone();
             if (!newBoard.applyMove(move)) {
-                console.log("Invalid computer move: ", move);
+                console.error("Invalid computer move: ", move);
             }
             setBoard(newBoard);
         }, computerThinkingTime);
@@ -35,15 +35,17 @@ export default function LoneKnightPlayer() {
     }, [board, pickedSide]);
 
     // Print out game state for debugging
-    useEffect(() => {
-        console.log("Game State: ", board);
-        console.log("Grundy Value: ", board.grundyValue());
-    }, [board]);
+    if (DEBUG) {
+        useEffect(() => {
+            console.log("Game State: ", board);
+            console.log("Grundy Value: ", board.grundyValue());
+        }, [board]);
+    }
 
     let loneKnightRenderer = <LoneKnightRenderer gameState={board} submitter={(move) => {
         const newBoard = board.clone();
         if (!newBoard.applyMove(move)) {
-            console.log("Invalid move: ", move);
+            console.error("Invalid move: ", move);
         }
         setBoard(newBoard);
     }} />
@@ -79,7 +81,7 @@ export default function LoneKnightPlayer() {
             setBoard(LoneKnightState.gen());
             setPickedSide(false);
             setSidebarOpen(false);
-            console.log("New game started");
+            if (DEBUG) console.log("New game started");
         }}
         onUndo={() => {
             if (computerRef.current) {
@@ -88,10 +90,10 @@ export default function LoneKnightPlayer() {
             }
             const newBoard = board.clone();
             if (newBoard.turn) {
-                console.log("Player turn, undoing move");
+                if (DEBUG) console.log("Player turn, undoing move");
                 newBoard.undoMove();
             }
-            console.log("Computer turn, undoing move");
+            if (DEBUG) console.log("Computer turn, undoing move");
             newBoard.undoMove();
             setBoard(newBoard);
         }}

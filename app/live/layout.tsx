@@ -11,7 +11,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         if (!session) {
             const timeout = setTimeout(() => {
-                console.log("Session not found");
+                console.error("Session not found");
                 addSnackbarMessage({ text: "You must be logged in to play live games", error: true, duration: Infinity });
             }, 2000);
             return () => {

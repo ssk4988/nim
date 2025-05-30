@@ -6,7 +6,7 @@ import { PublicGame } from "@/types/websocket";
 import { SocketContext } from "../../socket-context";
 import MultiKnightRenderer from "@/app/games/multiknight/multiknight-renderer";
 import { useSnackbar } from "@/components/snackbar";
-import { timerUpdatePeriod } from "@/lib/constants";
+import { DEBUG, timerUpdatePeriod } from "@/lib/constants";
 import PlayerTiles from "../../player-tiles";
 import LoadingScreen from "@/components/ui/loading";
 import { Cell } from "@/types/knight";
@@ -58,7 +58,7 @@ export default function MultiKnightLive() {
     useEffect(() => {
         if (!socket) return;
         socket.on("game_info", (data: PublicGame<any>) => {
-            console.log("Game Info:", data);
+            if (DEBUG) console.log("Game Info:", data);
             setGameData(data);
             setSelectedCell(null);
             // create game state using class constructor
@@ -88,7 +88,7 @@ export default function MultiKnightLive() {
         // Update local game state
         const newGameState = gameState.clone();
         if (!newGameState.applyMove(move)) {
-            console.log("Invalid move: ", move);
+            console.error("Invalid move: ", move);
             return;
         }
         setGameState(newGameState);

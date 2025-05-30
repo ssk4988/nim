@@ -6,7 +6,7 @@ import { GameMenu } from "../game-menu";
 import { GameSidebar } from "../game-sidebar";
 import { Cell } from "@/types/knight";
 import TurnPrompt from "../turn-prompt";
-import { computerThinkingTime } from "@/lib/constants";
+import { computerThinkingTime, DEBUG } from "@/lib/constants";
 import MultiKnightRenderer from "./multiknight-renderer";
 
 export default function MultiKnightPlayer() {
@@ -27,7 +27,7 @@ export default function MultiKnightPlayer() {
             let move = board.optimalMove();
             const newBoard = board.clone();
             if (!newBoard.applyMove(move)) {
-                console.log("Invalid computer move: ", move);
+                console.error("Invalid computer move: ", move);
             }
             setBoard(newBoard);
         }, computerThinkingTime);
@@ -35,15 +35,17 @@ export default function MultiKnightPlayer() {
     }, [board, pickedSide]);
 
     // Print out game state for debugging
-    useEffect(() => {
-        console.log("Game State: ", board);
-        console.log("Grundy Value: ", board.grundyValue());
-    }, [board]);
+    if (DEBUG) {
+        useEffect(() => {
+            console.log("Game State: ", board);
+            console.log("Grundy Value: ", board.grundyValue());
+        }, [board]);
+    }
 
     let multiKnightRenderer = <MultiKnightRenderer gameState={board} selectedCell={selectedCell} submitter={(move) => {
         const newBoard = board.clone();
         if (!newBoard.applyMove(move)) {
-            console.log("Invalid move: ", move);
+            console.error("Invalid move: ", move);
         }
         setBoard(newBoard);
         setSelectedCell(null);
@@ -80,7 +82,7 @@ export default function MultiKnightPlayer() {
             setBoard(MultiKnightState.gen());
             setPickedSide(false);
             setSidebarOpen(false);
-            console.log("New game started");
+            if (DEBUG) console.log("New game started");
         }}
         onUndo={() => {
             if (computerRef.current) {
@@ -89,10 +91,10 @@ export default function MultiKnightPlayer() {
             }
             const newBoard = board.clone();
             if (newBoard.turn) {
-                console.log("Player turn, undoing move");
+                if (DEBUG) console.log("Player turn, undoing move");
                 newBoard.undoMove();
             }
-            console.log("Computer turn, undoing move");
+            if (DEBUG) console.log("Computer turn, undoing move");
             newBoard.undoMove();
             setBoard(newBoard);
         }}

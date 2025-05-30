@@ -9,6 +9,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { displayGameType, displayTimeControl } from "@/types/games";
 import { Button } from "@/components/ui/button";
 import { Copy, Link2 } from "lucide-react";
+import { DEBUG } from "@/lib/constants";
 
 
 export default function LobbyPage() {
@@ -31,16 +32,16 @@ export default function LobbyPage() {
     useEffect(() => {
         if (!socket) return;
         socket.on("lobby_info", (data: Lobby) => {
-            console.log("Lobby Info:", data);
+            if (DEBUG) console.log("Lobby Info:", data);
             setLobbyData(data);
         });
         socket.on("lobby_info_error", (error: string) => {
-            console.log("Lobby Error:", error);
+            if (DEBUG) console.log("Lobby Error:", error);
             addSnackbarMessage({ text: error, error: true, duration: 5000 });
             // router.replace("/live");
         });
         socket.on("queue_lobby_error", (error: string) => {
-            console.log("Queue Error:", error);
+            if (DEBUG) console.log("Queue Error:", error);
             addSnackbarMessage({ text: error, error: true, duration: 5000 });
         });
         socket.on("game_info", (data: PublicGame<any>) => {

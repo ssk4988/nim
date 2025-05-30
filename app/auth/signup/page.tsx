@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { DEBUG } from "@/lib/constants";
 import { isValidUsername } from "@/types/user";
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
@@ -45,7 +46,7 @@ function SignUpWrapped() {
     const handleSignup = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
-        console.log("signing up...")
+        if(DEBUG) console.log("signing up...")
         const res = await fetch("/api/auth/signup", {
             method: "POST",
             headers: {
@@ -73,7 +74,7 @@ function SignUpWrapped() {
                 addSnackbarMessage({ text: "Error signing in: " + loginResponse.error, error: true, duration: 5000 });
                 console.error("Error signing in: ", loginResponse.error);
             } else {
-                console.log("User signed in successfully");
+                if (DEBUG) console.log("User signed in successfully");
                 // Redirect to the home page
                 window.location.href = "/";
             }

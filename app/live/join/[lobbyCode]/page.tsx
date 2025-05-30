@@ -5,6 +5,7 @@ import { Lobby, PublicGame } from "@/types/websocket";
 import { SocketContext } from "../../socket-context";
 import { useSnackbar } from "@/components/snackbar";
 import LoadingScreen from "@/components/ui/loading";
+import { DEBUG } from "@/lib/constants";
 
 
 // intended to only be an endpoint for joining a lobby
@@ -27,7 +28,7 @@ export default function JoinPage() {
     useEffect(() => {
         if(!socket) return;
         socket.on("queue_lobby_error", (error: string) => {
-            console.log("Queue Error:", error);
+            if (DEBUG) console.log("Queue Error:", error);
             addSnackbarMessage({ text: error, error: true, duration: 5000 });
             router.replace("/live");
         });

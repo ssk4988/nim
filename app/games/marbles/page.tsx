@@ -25,7 +25,7 @@ export default function MarblesPlayer() {
             let move = board.optimalMove();
             const newBoard = board.clone();
             if (!newBoard.applyMove(move)) {
-                console.log("Invalid computer move: ", move);
+                console.error("Invalid computer move: ", move);
             }
             setBoard(newBoard);
         }, computerThinkingTime);
@@ -43,7 +43,7 @@ export default function MarblesPlayer() {
     let marblesRenderer = <MarblesRenderer gameState={board} submitter={(move) => {
         const newBoard = board.clone();
         if (!newBoard.applyMove(move)) {
-            console.log("Invalid move: ", move);
+            console.error("Invalid move: ", move);
         }
         setBoard(newBoard);
     }} />
@@ -79,7 +79,7 @@ export default function MarblesPlayer() {
             setBoard(MarblesState.gen());
             setPickedSide(false);
             setSidebarOpen(false);
-            console.log("New game started");
+            if (DEBUG) console.log("New game started");
         }}
         onUndo={() => {
             if (computerRef.current) {
@@ -88,10 +88,10 @@ export default function MarblesPlayer() {
             }
             const newBoard = board.clone();
             if (newBoard.turn) {
-                console.log("Player turn, undoing move");
+                if (DEBUG) console.log("Player turn, undoing move");
                 newBoard.undoMove();
             }
-            console.log("Computer turn, undoing move");
+            if (DEBUG) console.log("Computer turn, undoing move");
             newBoard.undoMove();
             setBoard(newBoard);
         }}

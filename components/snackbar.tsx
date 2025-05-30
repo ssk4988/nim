@@ -1,4 +1,5 @@
 'use client';
+import { DEBUG } from "@/lib/constants";
 import { ReactNode, FC, createContext, useContext, useState, useCallback, useRef, useEffect } from "react";
 
 type SnackbarMessage = {
@@ -29,7 +30,7 @@ export const SnackbarProvider: FC<{ children: ReactNode }> = ({ children }) => {
         if (duration === Infinity) return;
         // Automatically remove the message after the duration
         const timeout = setTimeout(() => {
-            console.log("Clearing timeout for message:", id);
+            if (DEBUG) console.log("Clearing timeout for message:", id);
             setMessages((prev) => prev.filter((msg) => msg.id !== id));
             timeoutsRef.current.delete(id);
         }, duration);
@@ -40,7 +41,7 @@ export const SnackbarProvider: FC<{ children: ReactNode }> = ({ children }) => {
     useEffect(() => {
         return () => {
             // Clear all timeouts when the component unmounts
-            console.log("Clearing all timeouts in SnackbarProvider");
+            if (DEBUG) console.log("Clearing all timeouts in SnackbarProvider");
             timeoutsRef.current.forEach((timeout) => clearTimeout(timeout));
             timeoutsRef.current.clear();
         };

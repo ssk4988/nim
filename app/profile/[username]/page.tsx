@@ -9,6 +9,7 @@ import { displayGameType, displayTimeControl } from "@/types/games";
 import LoadingScreen from "@/components/ui/loading";
 import { useSnackbar } from "@/components/snackbar";
 import { UserProfile } from "@/types/user";
+import { DEBUG } from "@/lib/constants";
 
 function NotFoundProfile() {
     return (
@@ -49,7 +50,7 @@ export default function Profile() {
             if (response.ok) {
                 const data = await response.json();
                 setProfile(data);
-                console.log("Profile data: ", data);
+                if (DEBUG) console.log("Profile data: ", data);
             } else {
                 addSnackbarMessage({ text: response.statusText, error: true, duration: 5000 });
                 console.error("Failed to fetch profile: ", response.statusText);

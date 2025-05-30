@@ -17,6 +17,7 @@ import { Switch } from "@/components/ui/switch";
 import { User } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DEBUG } from "@/lib/constants";
 
 export default function PlayPage() {
     const { socket, setSocket } = useContext(SocketContext);
@@ -58,7 +59,7 @@ export default function PlayPage() {
 
     useEffect(() => {
         if (!socket) {
-            console.log("Socket doesn't exist");
+            console.error("Socket doesn't exist");
             return;
         }
 
@@ -69,35 +70,35 @@ export default function PlayPage() {
 
         // Handle connection errors
         socket.on("connection_error", (error) => {
-            console.error("Error:", error);
+            if (DEBUG) console.error("Error:", error);
             addSnackbarMessage({ text: "Connection error: " + error, error: true, duration: Infinity });
         });
         // handle queueing errors
         socket.on("queue_lobby_error", (error) => {
-            console.error("Queue Error:", error);
+            if (DEBUG) console.error("Queue Error:", error);
             addSnackbarMessage({ text: "Queue error: " + error, error: true });
         });
         // Handle disconnection
         socket.on("disconnect", (error) => {
-            console.log("Disconnect:", error);
+            if (DEBUG) console.log("Disconnect:", error);
             setSocket(null);
         });
 
         // handle queue success - event for successfully adding player to queue
         socket.on("queue_lobby_success", (data: string) => {
-            console.log("Queue Success:", data);
+            if (DEBUG) console.log("Queue Success:", data);
             addSnackbarMessage({ text: "Queue success: " + data });
         });
 
         socket.on("game_info", (data: PublicGame<any>) => {
-            console.log("Game Start:", data);
+            if (DEBUG) console.log("Game Start:", data);
             const gameCode = data.code;
             const gameType = data.gameConfig.gameType;
             router.push(`/live/${gameType}/${gameCode}`);
         });
 
         socket.on("lobby_info", (data: Lobby) => {
-            console.log("Lobby Info:", data);
+            if (DEBUG) console.log("Lobby Info:", data);
             const lobbyCode = data.lobbyCode;
             router.push(`/live/lobby/${lobbyCode}`);
         });

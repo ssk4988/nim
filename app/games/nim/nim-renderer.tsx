@@ -1,4 +1,5 @@
 import { NimState } from "@/games/nim";
+import { DEBUG } from "@/lib/constants";
 import { NimMove } from "@/types/nim";
 
 export default function NimRenderer({ gameState, submitter }: { gameState: NimState, submitter?: (move: NimMove) => void }) {
@@ -8,7 +9,7 @@ export default function NimRenderer({ gameState, submitter }: { gameState: NimSt
         let disabled = !gameState.turn;
         for (let i = 1; i <= pile; i++) {
             let handler = submitter ? () => {
-                console.log("Clicked pile: ", index, " amount: ", i);
+                if (DEBUG) console.log("Clicked pile: ", index, " amount: ", i);
                 if (disabled) return;
                 let move: NimMove = { pile: index, amount: i };
                 submitter(move);

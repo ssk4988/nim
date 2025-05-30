@@ -3,6 +3,7 @@ import NextAuth, { NextAuthOptions, TokenInfo, User } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import jwt from "jsonwebtoken";
+import { DEBUG } from "@/lib/constants";
 
 const prisma = new PrismaClient();
 
@@ -19,22 +20,22 @@ export const localAuthOptions: NextAuthOptions = {
                 token: { label: "Token", type: "text" }
             },
             authorize: async (Credentials, req) => {
-                console.log("Authorizing Credentials: ", Credentials);
+                if (DEBUG) console.log("Authorizing Credentials: ", Credentials);
                 const { email, token } = Credentials as { email: string, token: string };
                 // Verify the token
                 try {
                     jwt.verify(token, process.env.JWT_SECRET!);
-                    console.log("Token is valid");
+                    if (DEBUG) console.log("Token is valid");
                 } catch (error) {
                     console.error("Token verification failed:", error);
                     throw new Error("Token verification failed");
                 }
-                console.log("Credentials: ", email);
+                if (DEBUG) console.log("Credentials: ", email);
                 // Check if the user exists in the database
                 const user = await prisma.users.findUnique({
                     where: { email },
                 });
-                console.log("User: ", user);
+                if (DEBUG) console.log("User: ", user);
                 if (user) {
                     // If user exists, return the partial user object (used in callbacks)
                     return {
@@ -79,7 +80,7 @@ export const localAuthOptions: NextAuthOptions = {
             return true; // Allow sign-in if the user exists
         },
         async session({ session, token }) {
-            console.log("session callback: ", session, token);
+            if (DEBUG) console.log("session callback: ", session, token);
             // Add the user ID to the session object
             if (token.email && session.user) {
                 if(!session.user.id || !session.user.name || !session.user.email || !session.user.username) {
