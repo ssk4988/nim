@@ -1,36 +1,58 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# NimGames.net
+
+NimGames.net is an interactive educational website for learning and exploring game theory, especially as it applies to competitive programming and combinatorial games. The site provides a hands-on experience with classic impartial games, allowing users to play against the computer or challenge other players live online.
+
+## Features
+
+- **Interactive Game Theory Playground:** Learn the fundamentals of combinatorial game theory through play and experimentation.
+- **Play Against the Computer:** Test your strategies against a computer opponent with optimal play.
+- **Live Multiplayer:** Play real-time games against other users from around the world.
+- **Educational Content:** In-depth articles and tutorials explaining the theory and strategies behind each game.
+
+## Supported Games
+
+- **Nim:** The classic game of removing stones from piles, foundational to combinatorial game theory.
+- **Marbles:** Take turns removing one to three marbles and win if you remove the last one.
+- **Lone Knight:** Move a single knight on a chessboard with restricted moves.
+- **Multi Knight:** Multiple knights on a chessboard with restricted moves.
 
 ## Getting Started
 
-First, run the development server:
+Visit [https://nimgames.net](https://nimgames.net) to start playing and learning.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+### Local Development
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+1. **Install dependencies:**
+   ```
+   npm install
+   ```
+2. **Start the development server:**
+   ```
+   npm run dev
+   ```
+3. **(Optional) Start the WebSocket server for live play:**
+   ```
+   npm run start:ws
+   ```
+4. Open your browser to [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Production
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- The site is hosted at [https://nimgames.net](https://nimgames.net).
+- Nginx is used as a reverse proxy for both the Next.js frontend and the WebSocket backend.
 
-## Learn More
+## Project Structure
 
-To learn more about Next.js, take a look at the following resources:
+- `app/` – Next.js application pages and components
+- `games/` – Game logic implementations
+- `websocket/` – WebSocket server and client utilities
+- `types/` – Shared TypeScript types
+- `public/` – Static assets
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## License
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+This project is for educational purposes.
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Explore, play, and master the art of combinatorial games at [nimgames.net](https://nimgames.net)!
