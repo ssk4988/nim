@@ -56,9 +56,10 @@ export class NimState {
         const grundy = this.grundyValue();
 
         if (grundy === 0) {
-            // Every move loses, pick an arbitrary move
-            const pile = this.piles.findIndex((pile) => pile > 0);
-            return { pile, amount: 1 };
+            // Every move loses, pick an random move
+            const nonEmptyPiles = [...Array(this.piles.length).keys()].filter((_, i) => this.piles[i] > 0);
+            const pile = nonEmptyPiles[Math.floor(Math.random() * nonEmptyPiles.length)];
+            return { pile, amount: 1 + Math.floor(Math.random() * this.piles[pile]) };
         }
 
         for (let i = 0; i < this.piles.length; i++) {
