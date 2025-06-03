@@ -19,11 +19,14 @@ export default function MarblesRenderer({ gameState, submitter }: { gameState: M
                 className={`stone-button marble-img ${disabled || i > gameState.maxMarblesPerTurn ? "no-hover" : ""}`}
                 onClick={handler}
                 disabled={disabled}
-            ></button>
+            />
         );
     }
     marbles.reverse();
-    return <div className="flex flex-row items-end justify-center gap-4 mt-8 min-h-[200px]">
-        {marbles}
+    return <div className="flex flex-col gap-4 items-center justify-end mt-8 min-h-[200px]">
+        <div className="text-lg font-bold">{gameState.marbles} marbles left</div>
+        <div className="flex flex-row items-end justify-center gap-4">
+            {marbles}
+        </div>
     </div>
 }

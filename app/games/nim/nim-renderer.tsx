@@ -20,11 +20,14 @@ export default function NimRenderer({ gameState, submitter }: { gameState: NimSt
                     className={`stone-button stone-img ${disabled ? "no-hover" : ""}`}
                     onClick={handler}
                     disabled={disabled}
-                ></button>
+                />
             );
         }
         stones.reverse();
-        return (<div key={index} className="flex flex-col-reverse items-center justify-center">{stones}</div>);
+        return (<div key={index} className="flex flex-col-reverse items-center justify-center">
+            <div className="text-md font-bold">{pile}</div>
+            {stones}
+        </div>);
     });
     return <div className="flex flex-row items-end justify-center gap-9 mt-8 min-h-[200px]">
         {piles}
