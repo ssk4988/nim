@@ -19,7 +19,7 @@ export default function MultiKnightPlayer() {
     let [selectedCell, setSelectedCell] = useState<Cell | null>(null);
 
 
-    // Computer AI
+    // Computer Logic
     useEffect(() => {
         if (board.turn || !pickedSide || board.isGameOver()) return;
         let timer = setTimeout(() => {

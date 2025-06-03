@@ -55,8 +55,8 @@ export class MarblesState {
         const grundy = this.grundyValue();
 
         if (grundy === 0) {
-            // Every move loses, pick an arbitrary move
-            return { amount: 1 };
+            // Every move loses, pick an random move
+            return { amount: 1 + Math.floor(Math.random() * Math.min(this.maxMarblesPerTurn, this.marbles)) };
         }
 
         return { amount: grundy };

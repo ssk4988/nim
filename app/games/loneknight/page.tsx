@@ -19,7 +19,7 @@ export default function LoneKnightPlayer() {
     let [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
     let computerRef = useRef<NodeJS.Timeout | null>(null);
 
-    // Computer AI
+    // Computer Logic
     useEffect(() => {
         if (board.turn || !pickedSide || board.isGameOver()) return;
         let timer = setTimeout(() => {

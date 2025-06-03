@@ -79,7 +79,7 @@ export class LoneKnightState {
 
         const validMoves = knightValidMoves(this.knightPosition.row, this.knightPosition.col);
         if (grundy === 0) {
-            // Every move loses, pick an arbitrary move
+            // Every move loses, pick an random move
             return validMoves[Math.floor(Math.random() * validMoves.length)];
         }
 
