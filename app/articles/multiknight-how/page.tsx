@@ -10,7 +10,8 @@ const content = `
 ### Rules
 Multi Knight is a modified version of [Lone Knight](/articles/loneknight-how) where there are multiple
 knights on the same board. In each turn, the player must move one of the knights. Multiple knights can
-occupy the same square without interfering with each other.
+occupy the same square without interfering with each other. If multiple knights are on the same square,
+you can only move one of them at a time. The game ends when there are no more valid moves left for any knight.
 
 ### Using this Site
 When playing Multi Knight on this website, you will see a chessboard with multiple knights on it.
