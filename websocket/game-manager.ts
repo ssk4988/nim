@@ -39,8 +39,7 @@ export function createGameTimeout(gameData: Game<GameInterface<any, any>>) {
 
     // End the game
     endGameRoom(tmpGameData.code);
-  }
-    , timeToEnd + EPSILON);
+  }, timeToEnd + EPSILON);
   gameTimeouts.set(gameCode, gameTimeout);
 }
 

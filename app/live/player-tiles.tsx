@@ -20,7 +20,7 @@ export default function PlayerTiles({ players, timers, winner, turn }: PlayerTil
             </div>;
             let timer = timers[index];
             let timerFormatted = formatDuration(timer);
-            let crown = winner !== null && winner == index ? <Crown className="ml-2 text-yellow-500" fill="currentColor" /> : null;
+            let crown = winner !== null && winner == index ? <Crown className="ml-2 mr-2 text-yellow-500" fill="currentColor" /> : null;
             let timerColor = turn == (index === 0) ? "bg-white" : "bg-gray-300";
             let timerDisplay = <div className={`w-12 h-12 rounded-sm border flex items-center justify-center ${timerColor} justify-self-${index === 0 ? "end" : "start"}`}>
                 {timerFormatted}
