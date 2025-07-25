@@ -1,6 +1,5 @@
 import Link from "next/link";
 import ArticleTile from "./article-tile";
-import { title } from "process";
 
 const articles = [
     { title: "Introduction to Game Theory", slug: "introduction" },

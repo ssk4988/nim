@@ -12,17 +12,17 @@ export interface PlayerTilesProps {
 export default function PlayerTiles({ players, timers, winner, turn }: PlayerTilesProps) {
     return <div className="grid grid-cols-2 gap-4 w-3/4">
         {players.map((player, index) => {
-            let pfp = <div className={`w-12 h-12 rounded-full bg-blue-500 text-white flex items-center justify-center ${index === 0 ? "mr-2" : "ml-2"}`}>
+            const pfp =  <div className={`w-12 h-12 rounded-full bg-blue-500 text-white flex items-center justify-center ${index === 0 ? "mr-2" : "ml-2"}`}>
                 {player.username[0]}
             </div>;
-            let name = <div className="max-w-[250px] overflow-hidden text-ellipsis">
+            const name = <div className="max-w-[250px] overflow-hidden text-ellipsis">
                 {player.username}
             </div>;
-            let timer = timers[index];
-            let timerFormatted = formatDuration(timer);
-            let crown = winner !== null && winner == index ? <Crown className="ml-2 mr-2 text-yellow-500" fill="currentColor" /> : null;
-            let timerColor = turn == (index === 0) ? "bg-white" : "bg-gray-300";
-            let timerDisplay = <div className={`w-12 h-12 rounded-sm border flex items-center justify-center ${timerColor} justify-self-${index === 0 ? "end" : "start"}`}>
+            const timer = timers[index];
+            const timerFormatted = formatDuration(timer);
+            const crown = winner !== null && winner == index ? <Crown className="ml-2 mr-2 text-yellow-500" fill="currentColor" /> : null;
+            const timerColor = turn == (index === 0) ? "bg-white" : "bg-gray-300";
+            const timerDisplay = <div className={`w-12 h-12 rounded-sm border flex items-center justify-center ${timerColor} justify-self-${index === 0 ? "end" : "start"}`}>
                 {timerFormatted}
             </div>;
             return <div key={index} className={`flex flex-row items-center justify-between border p-2 rounded-lg`}>

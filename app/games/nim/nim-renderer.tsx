@@ -3,15 +3,15 @@ import { DEBUG } from "@/lib/constants";
 import { NimMove } from "@/types/nim";
 
 export default function NimRenderer({ gameState, submitter }: { gameState: NimState, submitter?: (move: NimMove) => void }) {
-    let piles = gameState.piles.map((pile, index) => {
+    const piles = gameState.piles.map((pile, index) => {
         if (pile === 0) return null;
-        let stones = [];
-        let disabled = !gameState.turn;
+        const stones = [];
+        const disabled = !gameState.turn;
         for (let i = 1; i <= pile; i++) {
-            let handler = submitter ? () => {
+            const handler = submitter ? () => {
                 if (DEBUG) console.log("Clicked pile: ", index, " amount: ", i);
                 if (disabled) return;
-                let move: NimMove = { pile: index, amount: i };
+                const move: NimMove = { pile: index, amount: i };
                 submitter(move);
             } : undefined;
             stones.push(

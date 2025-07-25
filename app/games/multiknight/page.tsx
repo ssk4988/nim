@@ -12,19 +12,19 @@ import MultiKnightRenderer from "./multiknight-renderer";
 export default function MultiKnightPlayer() {
     const { data: session } = useSession();
     // Initialize game state
-    let [board, setBoard] = useState<MultiKnightState>(MultiKnightState.gen());
-    let [pickedSide, setPickedSide] = useState<boolean>(false);
-    let [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
-    let computerRef = useRef<NodeJS.Timeout | null>(null);
-    let [selectedCell, setSelectedCell] = useState<Cell | null>(null);
+    const [board, setBoard] = useState<MultiKnightState>(MultiKnightState.gen());
+    const [pickedSide, setPickedSide] = useState<boolean>(false);
+    const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
+    const computerRef = useRef<NodeJS.Timeout | null>(null);
+    const [selectedCell, setSelectedCell] = useState<Cell | null>(null);
 
 
     // Computer Logic
     useEffect(() => {
         if (board.turn || !pickedSide || board.isGameOver()) return;
-        let timer = setTimeout(() => {
+        const timer = setTimeout(() => {
             if (board.turn || !pickedSide || board.isGameOver()) return;
-            let move = board.optimalMove();
+            const move = board.optimalMove();
             const newBoard = board.clone();
             if (!newBoard.applyMove(move)) {
                 console.error("Invalid computer move: ", move);
@@ -42,7 +42,7 @@ export default function MultiKnightPlayer() {
         }, [board]);
     }
 
-    let multiKnightRenderer = <MultiKnightRenderer gameState={board} selectedCell={selectedCell} submitter={(move) => {
+    const multiKnightRenderer = <MultiKnightRenderer gameState={board} selectedCell={selectedCell} submitter={(move) => {
         const newBoard = board.clone();
         if (!newBoard.applyMove(move)) {
             console.error("Invalid move: ", move);
@@ -60,7 +60,7 @@ export default function MultiKnightPlayer() {
         statusMessage = board.turn ? "It's your turn!" : "Computer is thinking...";
     }
 
-    let turnPrompt = <TurnPrompt
+    const turnPrompt = <TurnPrompt
         firstAction={() => {
             setPickedSide(true);
             setBoard(board => {
@@ -76,7 +76,7 @@ export default function MultiKnightPlayer() {
             });
         }} />
 
-    let menu = <GameMenu
+    const menu = <GameMenu
         onHelp={() => setSidebarOpen(!sidebarOpen)}
         onRestart={() => {
             setBoard(MultiKnightState.gen());
@@ -100,7 +100,7 @@ export default function MultiKnightPlayer() {
         }}
     />
 
-    let sidebar = <GameSidebar open={sidebarOpen} onOpenChange={setSidebarOpen}>
+    const sidebar = <GameSidebar open={sidebarOpen} onOpenChange={setSidebarOpen}>
         <h2 className="text-lg font-bold">Rules</h2>
         <p>Players take turns moving any knight on the board. The player who makes the last move wins.</p>
         <h2 className="text-lg font-bold">How to Play</h2>

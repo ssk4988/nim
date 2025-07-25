@@ -29,9 +29,9 @@ the knight can't move 3 squares in a direction.
 `;
 export default function LoneKnightStrategy() {
     const [showMore, setShowMore] = useState(false);
-    let rows: CellInfo[][] = [];
+    const rows: CellInfo[][] = [];
     for (let i = 0; i < LoneKnightState.boardHeight; i++) {
-        let row: CellInfo[] = [];
+        const row: CellInfo[] = [];
         for (let j = 0; j < LoneKnightState.boardWidth; j++) {
             const bad = (i + 2 >= LoneKnightState.boardHeight && j + 2 >= LoneKnightState.boardWidth);
             row.push({
@@ -41,9 +41,9 @@ export default function LoneKnightStrategy() {
         }
         rows.push(row);
     }
-    let rows2: CellInfo[][] = [];
+    const rows2: CellInfo[][] = [];
     for (let i = 0; i < LoneKnightState.boardHeight; i++) {
-        let row: CellInfo[] = [];
+        const row: CellInfo[] = [];
         for (let j = 0; j < LoneKnightState.boardWidth; j++) {
             const bad = knightGrundyValues[i][j] === 0;
             row.push({

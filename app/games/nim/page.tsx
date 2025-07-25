@@ -1,7 +1,5 @@
 'use client';
-import { Button } from "@/components/ui/button";
 import { NimState } from "@/games/nim";
-import { useSession } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
 import { GameMenu } from "../game-menu";
 import { GameSidebar } from "../game-sidebar";
@@ -10,19 +8,18 @@ import NimRenderer from "./nim-renderer";
 import { computerThinkingTime, DEBUG } from "@/lib/constants";
 
 export default function NimPlayer() {
-    const { data: session } = useSession();
     // Initialize game state
-    let [board, setBoard] = useState<NimState>(NimState.gen());
-    let [pickedSide, setPickedSide] = useState<boolean>(false);
-    let [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
-    let computerRef = useRef<NodeJS.Timeout | null>(null);
+    const [board, setBoard] = useState<NimState>(NimState.gen());
+    const [pickedSide, setPickedSide] = useState<boolean>(false);
+    const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
+    const computerRef = useRef<NodeJS.Timeout | null>(null);
 
     // Computer Logic
     useEffect(() => {
         if (board.turn || !pickedSide || board.isGameOver()) return;
-        let timer = setTimeout(() => {
+        const timer = setTimeout(() => {
             if (board.turn || !pickedSide || board.isGameOver()) return;
-            let move = board.optimalMove();
+            const move = board.optimalMove();
             const newBoard = board.clone();
             if (!newBoard.applyMove(move)) {
                 console.error("Invalid computer move: ", move);
@@ -40,7 +37,7 @@ export default function NimPlayer() {
         }, [board]);
     }
 
-    let nimRenderer = <NimRenderer gameState={board} submitter={(move) => {
+    const nimRenderer = <NimRenderer gameState={board} submitter={(move) => {
         const newBoard = board.clone();
         if (!newBoard.applyMove(move)) {
             console.error("Invalid move: ", move);
@@ -57,7 +54,7 @@ export default function NimPlayer() {
         statusMessage = board.turn ? "It's your turn!" : "Computer is thinking...";
     }
 
-    let turnPrompt = <TurnPrompt
+    const turnPrompt = <TurnPrompt
         firstAction={() => {
             setPickedSide(true);
             setBoard(board => {
@@ -73,7 +70,7 @@ export default function NimPlayer() {
             });
         }} />
 
-    let menu = <GameMenu
+    const menu = <GameMenu
         onHelp={() => setSidebarOpen(!sidebarOpen)}
         onRestart={() => {
             setBoard(NimState.gen());
@@ -97,7 +94,7 @@ export default function NimPlayer() {
         }}
     />
 
-    let sidebar = <GameSidebar open={sidebarOpen} onOpenChange={setSidebarOpen}>
+    const sidebar = <GameSidebar open={sidebarOpen} onOpenChange={setSidebarOpen}>
         <h2 className="text-lg font-bold">Rules</h2>
         <p>
             Nim is a mathematical game of strategy in which two players take turns removing stones from piles. On each turn, a player must pick a pile and remove at least one stone from it. The goal of the game is to be the player who removes the last stone.

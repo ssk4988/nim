@@ -5,7 +5,7 @@ import { DEBUG } from "@/lib/constants";
 import { ClientToServerEvents, ServerToClientEvents } from "@/types/websocket";
 import { useSession } from "next-auth/react";
 import React, { useEffect } from "react";
-import { createContext, useContext } from "react";
+import { createContext } from "react";
 import { Socket } from "socket.io";
 import { io } from "socket.io-client";
 

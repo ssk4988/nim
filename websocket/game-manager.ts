@@ -5,16 +5,16 @@ import { flipGamePerspective, gameStateFactory, makePublicGame, shouldGameEnd, s
 import { EPSILON } from "@/lib/constants";
 
 // Creates a timeout for a game
-export function createGameTimeout(gameData: Game<GameInterface<any, any>>) {
-  let gameCode = gameData.code;
-  let prevGameTimeout = gameTimeouts.get(gameCode);
+export function createGameTimeout<G, M>(gameData: Game<GameInterface<G, M>>) {
+  const gameCode = gameData.code;
+  const prevGameTimeout = gameTimeouts.get(gameCode);
   if (prevGameTimeout) {
     clearTimeout(prevGameTimeout);
     gameTimeouts.delete(gameCode);
   }
   synchronizeGameTime(gameData);
-  let timeToEnd = gameData.playerTimes[gameData.playerTurn];
-  let gameTimeout = setTimeout(() => {
+  const timeToEnd = gameData.playerTimes[gameData.playerTurn];
+  const gameTimeout = setTimeout(() => {
     console.log(`Game ${gameCode} timed out!`);
     gameTimeouts.delete(gameCode);
     const tmpGameData = games.get(gameCode);
@@ -77,8 +77,8 @@ export function makeGameRoom(game: GameConfig, player1: string, player2: string)
     name: player2State.userEmail,
     username: player2State.username,
   };
-  let firstPlayer = Math.floor(Math.random() * 2);
-  let timeMs = timeControlToMilliseconds(game.timeControl);
+  const firstPlayer = Math.floor(Math.random() * 2);
+  const timeMs = timeControlToMilliseconds(game.timeControl);
   const gameData = {
     players: [player1Data, player2Data] as [PlayerData, PlayerData],
     gameState: gameState,
@@ -133,7 +133,7 @@ export function endGameRoom(gameCode: string): boolean {
   }
 
 
-  let shouldEnd = shouldGameEnd(gameData);
+  const shouldEnd = shouldGameEnd(gameData);
   if (!shouldEnd) {
     console.log(`Game room ${gameCode} is still ongoing`);
     return false;
@@ -142,7 +142,7 @@ export function endGameRoom(gameCode: string): boolean {
   games.delete(gameCode);
 
   // clear the game timeout
-  let gameTimeout = gameTimeouts.get(gameCode);
+  const gameTimeout = gameTimeouts.get(gameCode);
   if (gameTimeout) {
     clearTimeout(gameTimeout);
     gameTimeouts.delete(gameCode);
@@ -174,8 +174,8 @@ export function endGameRoom(gameCode: string): boolean {
   const gameConfig = gameData.gameConfig;
   const gameCountToIncrement = `${gameConfig.gameType}_${gameConfig.timeControl}_games`;
   const winCountToIncrement = `${gameConfig.gameType}_${gameConfig.timeControl}_wins`;
-  for (let playerId of [player1Id, player2Id]) {
-    let playerIndex = playerId === player1Id ? 0 : 1;
+  for (const playerId of [player1Id, player2Id]) {
+    const playerIndex = playerId === player1Id ? 0 : 1;
     prisma.users.update({
       where: { userid: playerId },
       data: {

@@ -15,9 +15,9 @@ export interface ChessboardProps {
 
 // wrapper for a chessboard-like grid
 export default function Chessboard({ cells }: ChessboardProps) {
-    let rows = [];
+    const rows = [];
     for (let i = 0; i < cells.length; i++) {
-        let row = [];
+        const row = [];
         for (let j = 0; j < cells[i].length; j++) {
             const cellClassName = "w-8 h-8 border flex items-center justify-center select-none";
             const tileStyle = cn(cellClassName, cells[i][j].tileStyle);

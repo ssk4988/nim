@@ -14,10 +14,10 @@ export interface MultiKnightRendererProps {
 }
 
 export default function MultiKnightRenderer({ gameState, selectedCell, submitter, setSelectedCell }: MultiKnightRendererProps) {
-    let isPlayerTurn = gameState.turn;
+    const isPlayerTurn = gameState.turn;
     let moveSpots: { row: number, col: number, direction: number }[] = [];
     if (isPlayerTurn && selectedCell != null) {
-        let { row, col } = selectedCell;
+        const { row, col } = selectedCell;
         moveSpots = knightValidMoves(row, col).map(move => {
             return {
                 row: row + knightDirections[move.direction].row,
@@ -26,12 +26,12 @@ export default function MultiKnightRenderer({ gameState, selectedCell, submitter
             }
         });
     }
-    let rows: CellInfo[][] = [];
+    const rows: CellInfo[][] = [];
     for (let i = 0; i < MultiKnightState.boardHeight; i++) {
-        let row: CellInfo[] = [];
+        const row: CellInfo[] = [];
         for (let j = 0; j < MultiKnightState.boardWidth; j++) {
-            let hasKnight = gameState.grid[i][j] > 0;
-            let isMoveSpot = moveSpots.some(spot => spot.row === i && spot.col === j);
+            const hasKnight = gameState.grid[i][j] > 0;
+            const isMoveSpot = moveSpots.some(spot => spot.row === i && spot.col === j);
             let tileStyle = "bg-board-square hover:bg-board-square/50";
             let cell = undefined;
             let cellAction = undefined;
@@ -43,8 +43,8 @@ export default function MultiKnightRenderer({ gameState, selectedCell, submitter
                 tileStyle = "cursor-pointer bg-board-square hover:bg-board-square/50";
             }
             if (isMoveSpot && submitter) {
-                let direction = moveSpots.find(spot => spot.row === i && spot.col === j)!.direction;
-                let move: MultiKnightMove = { row: selectedCell!.row, col: selectedCell!.col, direction };
+                const direction = moveSpots.find(spot => spot.row === i && spot.col === j)!.direction;
+                const move: MultiKnightMove = { row: selectedCell!.row, col: selectedCell!.col, direction };
                 cellAction = () => submitter(move);
             } else if (hasKnight) {
                 cellAction = () => {

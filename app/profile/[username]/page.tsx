@@ -1,6 +1,6 @@
 'use client';
 import { signOut } from "next-auth/react";
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useParams } from "next/navigation";
 import { liveGameTypes, liveTimeControlTypes } from "@/websocket/game-util";
@@ -27,13 +27,12 @@ export default function Profile() {
     const [isLoading, setIsLoading] = useState(true);
     const [profile, setProfile] = useState<UserProfile | null>(null);
     const { addSnackbarMessage } = useSnackbar();
-    if (!username) return <NotFoundProfile />;
-
+    
     const handleLogout = async () => {
         setIsLoading(true);
         await signOut({ callbackUrl: "/" });
     };
-
+    
     useEffect(() => {
         const fetchProfile = async () => {
             const response = await fetch("/api/profile", {
@@ -46,7 +45,7 @@ export default function Profile() {
                 }),
                 credentials: "include",
             });
-
+            
             if (response.ok) {
                 const data = await response.json();
                 setProfile(data);
@@ -59,6 +58,8 @@ export default function Profile() {
         };
         fetchProfile();
     }, []);
+    
+    if (!username) return <NotFoundProfile />;
 
     if (isLoading) {
         return <LoadingScreen text="Loading profile..." />;
@@ -73,9 +74,9 @@ export default function Profile() {
 
     const gamesInfo = liveGameTypes.map((game) => {
         return liveTimeControlTypes.map((timeControl) => {
-            let gameConfigString = `${game}_${timeControl}`;
-            let gameWinString = `${game}_${timeControl}_wins`;
-            let gameCountString = `${game}_${timeControl}_games`;
+            const gameConfigString = `${game}_${timeControl}`;
+            const gameWinString = `${game}_${timeControl}_wins`;
+            const gameCountString = `${game}_${timeControl}_games`;
             if (!(gameCountString in profile) || !(gameWinString in profile)) return null;
             const gameCount = profile[gameCountString as keyof typeof profile] as number;
             const gameWins = profile[gameWinString as keyof typeof profile] as number;

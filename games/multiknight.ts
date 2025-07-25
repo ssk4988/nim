@@ -33,8 +33,8 @@ export class MultiKnightState implements GameInterface<MultiKnightState, MultiKn
 
     /** Generates a random game state */
     static gen(): MultiKnightState {
-        let numberOfKnights = Math.floor(Math.random() * 5) + 3; // Random number of knights between 3 and 7
-        let grid = Array.from({ length: boardHeight }, () => Array(boardWidth).fill(0));
+        const numberOfKnights = Math.floor(Math.random() * 5) + 3; // Random number of knights between 3 and 7
+        const grid = Array.from({ length: boardHeight }, () => Array(boardWidth).fill(0));
         for (let i = 0; i < numberOfKnights; i++) {
             let row = 0, col = 0;
             // Ensure the knight has at least one valid move

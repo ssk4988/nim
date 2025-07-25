@@ -39,8 +39,8 @@ export default function NimLive() {
                 if (!gameData) return prevTimers;
                 // If the game is over, stop updating the timers
                 if (gameData.winner !== null) return prevTimers;
-                let newTimers: [number, number] = [...gameData.playerTimes];
-                let currentPlayer = gameState?.turn ? 0 : 1;
+                const newTimers: [number, number] = [...gameData.playerTimes];
+                const currentPlayer = gameState?.turn ? 0 : 1;
                 newTimers[currentPlayer] = Math.max(0, newTimers[currentPlayer] - (Date.now() - gameData.lastUpdated));
                 return newTimers;
             });
@@ -59,7 +59,7 @@ export default function NimLive() {
             if (DEBUG) console.log("Game Info:", data);
             setGameData(data);
             // create game state using class constructor
-            let tempGameState = new NimState(data.gameState.piles, data.gameState.turn);
+            const tempGameState = new NimState(data.gameState.piles, data.gameState.turn);
             setGameState(tempGameState);
             setDisplayTimers(data.playerTimes);
         });
@@ -79,9 +79,9 @@ export default function NimLive() {
         return <LoadingScreen text="Loading game..." />;
     }
 
-    let playerTiles = <PlayerTiles players={gameData.players} timers={displayTimers} winner={gameData.winner} turn={gameState.turn} />;
+    const playerTiles = <PlayerTiles players={gameData.players} timers={displayTimers} winner={gameData.winner} turn={gameState.turn} />;
     
-    let nimRenderer = <NimRenderer gameState={gameState} submitter={(move) => {
+    const nimRenderer = <NimRenderer gameState={gameState} submitter={(move) => {
         // Update local game state
         const newGameState = gameState.clone();
         if (!newGameState.applyMove(move)) {

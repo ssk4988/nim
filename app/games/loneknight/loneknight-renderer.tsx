@@ -10,7 +10,7 @@ export interface LoneKnightRendererProps {
 }
 
 export default function LoneKnightRenderer({ gameState, submitter }: LoneKnightRendererProps) {
-    let isPlayerTurn = gameState.turn;
+    const isPlayerTurn = gameState.turn;
     let moveSpots: { row: number, col: number, direction: number }[] = [];
     if (isPlayerTurn) {
         moveSpots = knightValidMoves(gameState.knightPosition.row, gameState.knightPosition.col).map(move => {
@@ -21,11 +21,11 @@ export default function LoneKnightRenderer({ gameState, submitter }: LoneKnightR
             }
         });
     }
-    let rows: CellInfo[][] = [];
+    const rows: CellInfo[][] = [];
     for (let i = 0; i < LoneKnightState.boardHeight; i++) {
-        let row: CellInfo[] = [];
+        const row: CellInfo[] = [];
         for (let j = 0; j < LoneKnightState.boardWidth; j++) {
-            let isKnight = i === gameState.knightPosition.row && j === gameState.knightPosition.col;
+            const isKnight = i === gameState.knightPosition.row && j === gameState.knightPosition.col;
             let tileStyle = "bg-board-square hover:bg-board-square/50";
             let cell = undefined;
             let cellAction = undefined;
@@ -33,9 +33,9 @@ export default function LoneKnightRenderer({ gameState, submitter }: LoneKnightR
                 cell = "♞";
                 tileStyle = "cursor-default bg-board-square hover:bg-board-square/50";
             } else if (moveSpots.some(spot => spot.row === i && spot.col === j)) {
-                let direction = moveSpots.find(spot => spot.row === i && spot.col === j)!.direction;
+                const direction = moveSpots.find(spot => spot.row === i && spot.col === j)!.direction;
                 cellAction = submitter ? () => {
-                    let move: LoneKnightMove = { direction };
+                    const move: LoneKnightMove = { direction };
                     submitter(move);
                 } : undefined;
                 cell = "•";

@@ -28,9 +28,9 @@ For each knight, calculate the Grundy number of the position and play nim on the
 `;
 export default function MultiKnightStrategy() {
     const [showMore, setShowMore] = useState(false);
-    let rows: CellInfo[][] = [];
+    const rows: CellInfo[][] = [];
     for (let i = 0; i < LoneKnightState.boardHeight; i++) {
-        let row: CellInfo[] = [];
+        const row: CellInfo[] = [];
         for (let j = 0; j < LoneKnightState.boardWidth; j++) {
             row.push({
                 tileStyle: "bg-board-square",

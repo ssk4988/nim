@@ -21,9 +21,9 @@ Try viewing possible moves for each knight on the board below!
   
 `;
 export default function HowToPlayMultiKnight() {
-    let grid: number[][] = [];
+    const grid: number[][] = [];
     for (let i = 0; i < 8; i++) {
-        let row: number[] = [];
+        const row: number[] = [];
         for (let j = 0; j < 8; j++) {
             row.push(0);
         }

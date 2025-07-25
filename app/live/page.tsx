@@ -53,7 +53,7 @@ export default function PlayPage() {
 
     const lobbyInputHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
         // keep letters and convert to uppercase
-        let code = e.target.value.replace(/[^a-zA-Z]/g, "").toUpperCase();
+        const code = e.target.value.replace(/[^a-zA-Z]/g, "").toUpperCase();
         setLobbyInput(code);
     };
 
