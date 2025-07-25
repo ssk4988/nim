@@ -1,7 +1,8 @@
+import { GameInterface } from "@/types/games";
 import { NimMove } from "@/types/nim";
 
 /** Represents the state of the Nim game */
-export class NimState {
+export class NimState implements GameInterface<NimState, NimMove> {
     public piles: number[];
     public turn: boolean; // true if it's the player's turn, false if it's the computer's turn
     public moves: NimMove[];

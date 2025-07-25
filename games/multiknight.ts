@@ -1,10 +1,11 @@
-import { LoneKnightMove, MultiKnightMove } from "@/types/knight";
+import { MultiKnightMove } from "@/types/knight";
 import { knightValidMoves, knightDirections, knightGrundyValues, knightShortestPath } from "./knight";
+import { GameInterface } from "@/types/games";
 
 const boardWidth = 8;
 const boardHeight = 8;
 /** Represents the state of the Knight game */
-export class MultiKnightState {
+export class MultiKnightState implements GameInterface<MultiKnightState, MultiKnightMove> {
     public static boardWidth = boardWidth;
     public static boardHeight = boardHeight;
     public grid: number[][];

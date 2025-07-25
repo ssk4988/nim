@@ -1,13 +1,9 @@
-import { LoneKnightState } from "@/games/loneknight";
-import { MarblesState } from "@/games/marbles";
-import { MultiKnightState } from "@/games/multiknight";
-import { NimState } from "@/games/nim";
-import { GameInterface, GameTypeEnum, TimeControlEnum } from "@/types/games";
+import { GameInterface, GameTypeEnum, TimeControlEnum, GameEnumToGameState, GameTypeToState } from "@/types/games";
 import { Game, PublicGame } from "@/types/websocket";
 
 // turn the game into a public game
-export function makePublicGame<GameState extends GameInterface<any, any>>(game: Game<GameState>): PublicGame<GameState> {
-  const returnobject: PublicGame<GameState> = {
+export function makePublicGame<G, M>(game: Game<GameInterface<G, M>>): PublicGame<GameInterface<G, M>> {
+  const returnobject: PublicGame<GameInterface<G, M>> = {
     players: [
       { name: game.players[0].name, username: game.players[0].username },
       { name: game.players[1].name, username: game.players[1].username },
@@ -24,9 +20,9 @@ export function makePublicGame<GameState extends GameInterface<any, any>>(game: 
 }
 
 // Switch players if needed
-export function flipGamePerspective<GameState extends GameInterface<any, any>>(game: PublicGame<GameState>, flip: boolean) {
+export function flipGamePerspective<G extends GameInterface<G, M>, M>(game: PublicGame<GameInterface<G, M>>, flip: boolean) {
   if(!flip) return game;
-  let adjustedGame: PublicGame<GameState> = { ...game, gameState: game.gameState.clone() };
+  let adjustedGame: PublicGame<GameInterface<G, M>> = { ...game, gameState: game.gameState.clone() };
   adjustedGame.players = [game.players[1], game.players[0]];
   adjustedGame.gameState.turn = !game.gameState.turn;
   adjustedGame.firstPlayer = game.firstPlayer === 0 ? 1 : 0;
@@ -38,22 +34,11 @@ export function flipGamePerspective<GameState extends GameInterface<any, any>>(g
 }
 
 export function gameStateFactory(type: GameTypeEnum): GameInterface<any, any> {
-  switch (type) {
-    case GameTypeEnum.NIM:
-      return NimState.gen();
-    case GameTypeEnum.MARBLES:
-      return MarblesState.gen();
-    case GameTypeEnum.LONE_KNIGHT:
-      return LoneKnightState.gen();
-    case GameTypeEnum.MULTI_KNIGHT:
-      return MultiKnightState.gen();
-    default:
-      throw new Error("Invalid game type");
-  }
+  return GameEnumToGameState[type].gen();
 }
 
 // Synchronize the game time with the server in place
-export function synchronizeGameTime(game: Game<GameInterface<any, any>>) {
+export function synchronizeGameTime<G, M>(game: Game<GameInterface<G, M>>) {
   if (game.winner !== null) {
     return;
   }
@@ -64,7 +49,7 @@ export function synchronizeGameTime(game: Game<GameInterface<any, any>>) {
 }
 
 // check if a game is over, assuming the game is not already over and is synchronized
-export function shouldGameEnd(game: Game<GameInterface<any, any>>): boolean {
+export function shouldGameEnd<G, M>(game: Game<GameInterface<G, M>>): boolean {
   if (game.gameState.isGameOver()) {
     return true;
   }

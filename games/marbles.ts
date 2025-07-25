@@ -1,7 +1,8 @@
+import { GameInterface } from "@/types/games";
 import { MarblesMove } from "@/types/marbles";
 
 /** Represents the state of the Marbles game */
-export class MarblesState {
+export class MarblesState implements GameInterface<MarblesState, MarblesMove> {
     public marbles: number;
     public turn: boolean; // true if it's the player's turn, false if it's the computer's turn
     public moves: MarblesMove[];

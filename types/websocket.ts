@@ -16,7 +16,7 @@ export interface PublicPlayerData {
 }
 
 // internal state of the game board, along with metadata about the game
-export interface Game<GameState extends GameInterface<any, any>> {
+export interface Game<GameState> {
     players: [PlayerData, PlayerData]; // List of players in the game (2 exactly)
     gameState: GameState; // The current state of the game
     firstPlayer: number; // The player who goes first
@@ -29,7 +29,7 @@ export interface Game<GameState extends GameInterface<any, any>> {
 }
 
 // public state of the game board, along with metadata about the game
-export interface PublicGame<GameState extends GameInterface<any, any>> {
+export interface PublicGame<GameState> {
     players: [PublicPlayerData, PublicPlayerData]; // List of players in the game (2 exactly)
     gameState: GameState; // The current state of the game
     firstPlayer: number; // The player who goes first

@@ -1,10 +1,11 @@
 import { Cell, LoneKnightMove } from "@/types/knight";
 import { knightValidMoves, knightDirections, knightGrundyValues, knightShortestPath } from "./knight";
+import { GameInterface } from "@/types/games";
 
 const boardWidth = 8;
 const boardHeight = 8;
 /** Represents the state of the Knight game */
-export class LoneKnightState {
+export class LoneKnightState implements GameInterface<LoneKnightState, LoneKnightMove> {
     public static boardWidth = boardWidth;
     public static boardHeight = boardHeight;
     public knightPosition: Cell;

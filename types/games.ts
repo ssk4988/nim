@@ -1,3 +1,8 @@
+import { LoneKnightState } from "@/games/loneknight";
+import { MarblesState } from "@/games/marbles";
+import { MultiKnightState } from "@/games/multiknight";
+import { NimState } from "@/games/nim";
+
 export enum GameTypeEnum {
     NIM = "nim",
     MARBLES = "marbles",
@@ -15,6 +20,20 @@ export interface GameInterface<GameState, Move> {
     optimalMove(): Move; // calculate the optimal move for the current player
     undoMove(): void; // undo the last move
 }
+
+export const GameEnumToGameState = {
+    [GameTypeEnum.NIM]: NimState,
+    [GameTypeEnum.MARBLES]: MarblesState,
+    [GameTypeEnum.LONE_KNIGHT]: LoneKnightState,
+    [GameTypeEnum.MULTI_KNIGHT]: MultiKnightState,
+}
+
+export type GameTypeToState = {
+  [GameTypeEnum.NIM]: NimState;
+  [GameTypeEnum.MARBLES]: MarblesState;
+  [GameTypeEnum.LONE_KNIGHT]: LoneKnightState;
+  [GameTypeEnum.MULTI_KNIGHT]: MultiKnightState;
+};
 
 export enum TimeControlEnum {
     MIN5 = "5m",
