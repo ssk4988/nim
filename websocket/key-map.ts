@@ -1,3 +1,5 @@
+// this is a map that uses JSON.stringify to serialize keys
+// this allows for complex objects to be used as keys
 export class KeyMap<K, V> {
     private map = new Map<string, V>();
 

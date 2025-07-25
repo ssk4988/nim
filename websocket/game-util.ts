@@ -7,7 +7,7 @@ import { Game, PublicGame } from "@/types/websocket";
 
 // turn the game into a public game
 export function makePublicGame<GameState extends GameInterface<any, any>>(game: Game<GameState>): PublicGame<GameState> {
-  let returnobject: PublicGame<GameState> = {
+  const returnobject: PublicGame<GameState> = {
     players: [
       { name: game.players[0].name, username: game.players[0].username },
       { name: game.players[1].name, username: game.players[1].username },
@@ -75,6 +75,7 @@ export function shouldGameEnd(game: Game<GameInterface<any, any>>): boolean {
   return false;
 }
 
+// These are the game types and time controls enabled for live games
 export const liveGameTypes: GameTypeEnum[] = [GameTypeEnum.NIM, GameTypeEnum.MARBLES, GameTypeEnum.MULTI_KNIGHT];
 export const liveTimeControlTypes: TimeControlEnum[] = [
   TimeControlEnum.SEC15,

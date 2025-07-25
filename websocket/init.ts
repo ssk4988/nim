@@ -44,10 +44,10 @@ for (const gameType of liveGameTypes) {
 export const games: Map<string, Game<GameInterface<any, any>>> = new Map();
 
 // map of game timeouts
-export const gameTimeouts: Map<string, NodeJS.Timeout> = new Map();
+export const gameTimeouts: Map<string, NodeJS.Timeout> = new Map<string, NodeJS.Timeout>();
 
 // map of lobbies
-export const lobbies: Map<string, Lobby> = new Map();
+export const lobbies: Map<string, Lobby> = new Map<string, Lobby>();
 
 export function getWsKey(username: string): string {
   return `ws:${username}`;

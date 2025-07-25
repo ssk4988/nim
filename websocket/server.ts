@@ -7,7 +7,7 @@ import { connections, games, getWsKey, httpServer, io, lobbies, prisma } from ".
 import { clearQueueLobbyHandler, joinLobbyHandler, lobbyHandler, queueHandler } from "./queue-lobby";
 import { createGameTimeout, endGameRoom } from "./game-manager";
 
-
+// Load environment variables from .env file
 const envpath = `.env.${process.env.NODE_ENV}`;
 console.log("ENV Path:", envpath);
 dotenv.config({ path: envpath });
