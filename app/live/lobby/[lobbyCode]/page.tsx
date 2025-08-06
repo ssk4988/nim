@@ -44,9 +44,9 @@ export default function LobbyPage() {
             if (DEBUG) console.log("Queue Error:", error);
             addSnackbarMessage({ text: error, error: true, duration: 5000 });
         });
-        socket.on("game_info", (data: PublicGame<any>) => {
-            let gameConfig = data.gameConfig;
-            let gameCode = data.code;
+        socket.on("game_info", (data: PublicGame<unknown>) => {
+            const gameConfig = data.gameConfig;
+            const gameCode = data.code;
             router.push(`/live/${gameConfig.gameType}/${gameCode}`);
         });
         socket.emit("request_lobby_info", lobbyCode);

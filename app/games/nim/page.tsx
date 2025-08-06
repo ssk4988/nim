@@ -30,12 +30,12 @@ export default function NimPlayer() {
     }, [board, pickedSide]);
 
     // Print out game state for debugging
-    if (DEBUG) {
-        useEffect(() => {
+    useEffect(() => {
+        if (DEBUG) {
             console.log("Game State: ", board);
             console.log("Grundy Value: ", board.grundyValue());
-        }, [board]);
-    }
+        }
+    }, [board]);
 
     const nimRenderer = <NimRenderer gameState={board} submitter={(move) => {
         const newBoard = board.clone();
@@ -110,7 +110,7 @@ export default function NimPlayer() {
                 target="_blank"
                 className="text-blue-500 hover:underline"
             >
-                Brilliant's Article on Nim
+                Brilliant&apos;s Article on Nim
             </a>
         </p>
     </GameSidebar>

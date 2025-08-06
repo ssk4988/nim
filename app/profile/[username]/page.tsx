@@ -33,6 +33,7 @@ export default function Profile() {
         await signOut({ callbackUrl: "/" });
     };
     
+    // fetch profile data
     useEffect(() => {
         const fetchProfile = async () => {
             const response = await fetch("/api/profile", {
@@ -57,6 +58,7 @@ export default function Profile() {
             setIsLoading(false);
         };
         fetchProfile();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
     
     if (!username) return <NotFoundProfile />;

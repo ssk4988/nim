@@ -1,6 +1,5 @@
 'use client';
 import { MultiKnightState } from "@/games/multiknight";
-import { useSession } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
 import { GameMenu } from "../game-menu";
 import { GameSidebar } from "../game-sidebar";
@@ -10,7 +9,6 @@ import { computerThinkingTime, DEBUG } from "@/lib/constants";
 import MultiKnightRenderer from "./multiknight-renderer";
 
 export default function MultiKnightPlayer() {
-    const { data: session } = useSession();
     // Initialize game state
     const [board, setBoard] = useState<MultiKnightState>(MultiKnightState.gen());
     const [pickedSide, setPickedSide] = useState<boolean>(false);
@@ -35,12 +33,12 @@ export default function MultiKnightPlayer() {
     }, [board, pickedSide]);
 
     // Print out game state for debugging
-    if (DEBUG) {
-        useEffect(() => {
+    useEffect(() => {
+        if (DEBUG) {
             console.log("Game State: ", board);
             console.log("Grundy Value: ", board.grundyValue());
-        }, [board]);
-    }
+        }
+    }, [board]);
 
     const multiKnightRenderer = <MultiKnightRenderer gameState={board} selectedCell={selectedCell} submitter={(move) => {
         const newBoard = board.clone();
@@ -107,7 +105,7 @@ export default function MultiKnightPlayer() {
         <p>
             To play, click on a knight and then select the square you want to move the knight to. A knight can move
             in an L shape, like in chess. However, it is restricted to moves that increase its distance from the
-            upper left corner of the board. If a knight has no more available moves, you can't move it anymore.
+            upper left corner of the board. If a knight has no more available moves, you can&apos;t move it anymore.
             The game ends when all knights are unable to move anymore.
         </p>
     </GameSidebar>

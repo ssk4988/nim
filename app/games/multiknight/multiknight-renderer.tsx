@@ -1,7 +1,6 @@
 import Chessboard, { CellInfo } from "@/components/ui/chessboard";
 import { knightDirections, knightValidMoves } from "@/games/knight";
 import { MultiKnightState } from "@/games/multiknight";
-import { cn } from "@/lib/utils";
 import { Cell, MultiKnightMove } from "@/types/knight";
 import { Badge } from "@radix-ui/themes";
 import { SetStateAction } from "react";

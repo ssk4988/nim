@@ -10,6 +10,7 @@ import {
     NavigationMenuList,
 } from "@/components/ui/navigation-menu"
 import { signIn, useSession } from "next-auth/react"
+import Image from "next/image"
 
 function HeaderButton({ href, name, pathname }: {
     href: string,
@@ -53,7 +54,7 @@ export function SiteHeader() {
         <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur">
             <div className="container flex h-16 items-center">
                 <Link href="/" className="flex items-center gap-2 ml-2">
-                    <img className="h-5 w-5" src="/images/nim.png" alt="Nim Games Logo" />
+                    <Image className="h-5 w-5" width={20} height={20} src="/images/nim.png" alt="Nim Games Logo" />
                     <span className="hidden font-bold sm:inline-block">Nim Games</span>
                 </Link>
 

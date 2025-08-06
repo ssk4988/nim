@@ -35,12 +35,12 @@ export default function LoneKnightPlayer() {
     }, [board, pickedSide]);
 
     // Print out game state for debugging
-    if (DEBUG) {
-        useEffect(() => {
+    useEffect(() => {
+        if (DEBUG) {
             console.log("Game State: ", board);
             console.log("Grundy Value: ", board.grundyValue());
-        }, [board]);
-    }
+        }
+    }, [board]);
 
     const loneKnightRenderer = <LoneKnightRenderer gameState={board} submitter={(move) => {
         const newBoard = board.clone();
