@@ -1,7 +1,6 @@
 import Chessboard, { CellInfo } from "@/components/ui/chessboard";
 import { knightDirections, knightValidMoves } from "@/games/knight";
 import { LoneKnightState } from "@/games/loneknight";
-import { cn } from "@/lib/utils";
 import { LoneKnightMove } from "@/types/knight";
 
 export interface LoneKnightRendererProps {

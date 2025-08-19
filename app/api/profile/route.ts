@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
-import { getServerSession } from "next-auth";
-import { localAuthOptions } from "../auth/authoptions";
 import { isValidUsername, UserProfile } from "@/types/user";
 
 const prisma = new PrismaClient();
@@ -24,7 +22,7 @@ export async function POST(req: Request) {
     if (!userProfile) {
         return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
-    const { email, userid, ...untypedUserProfile } = userProfile;
+    const { email: _email, userid: _userid, ...untypedUserProfile } = userProfile;
     const userProfileTyped: UserProfile = untypedUserProfile as UserProfile;
     
     return NextResponse.json(userProfileTyped, { status: 200 });

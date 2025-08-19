@@ -1,18 +1,13 @@
 'use client';
-import { Button } from "@/components/ui/button";
 import { LoneKnightState } from "@/games/loneknight";
-import { useSession } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
 import { GameMenu } from "../game-menu";
 import { GameSidebar } from "../game-sidebar";
-import { cn } from "@/lib/utils";
-import { knightValidMoves, knightDirections } from "@/games/knight";
 import TurnPrompt from "../turn-prompt";
 import { computerThinkingTime, DEBUG } from "@/lib/constants";
 import LoneKnightRenderer from "./loneknight-renderer";
 
 export default function LoneKnightPlayer() {
-    const { data: session } = useSession();
     // Initialize game state
     const [board, setBoard] = useState<LoneKnightState>(LoneKnightState.gen());
     const [pickedSide, setPickedSide] = useState<boolean>(false);

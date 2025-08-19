@@ -1,5 +1,6 @@
 'use client';
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import Image from "next/image";
 
 interface GameTileProps {
     game: string;
@@ -16,7 +17,7 @@ export default function GameTile({ game, description, img, children }: GameTileP
             {description && <CardDescription>{description}</CardDescription>}
         </CardHeader>
         <div className="flex items-center justify-center w-16 h-16 m-4">
-            <img src={imgPath} alt="Game Icon" className="w-16 h-16" />
+            <Image width={64} height={64} src={imgPath} alt={`${game} Game Icon`} className="w-16 h-16" />
         </div>
         {children}
     </Card>

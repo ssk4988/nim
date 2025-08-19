@@ -6,7 +6,7 @@ import { localAuthOptions } from "../../auth/authoptions";
 const prisma = new PrismaClient();
 
 // increments the number of games played by the user
-export async function POST(req: Request) {
+export async function POST(_req: Request) {
     const session = await getServerSession(localAuthOptions);
     if (!session) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

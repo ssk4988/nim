@@ -91,7 +91,7 @@ function SignUpWrapped() {
             <Card>
                 <CardHeader>
                     <CardTitle>Create an Account</CardTitle>
-                    <CardDescription>Welcome! Let's complete your account setup.</CardDescription>
+                    <CardDescription>Welcome! Let&apos;s complete your account setup.</CardDescription>
                 </CardHeader>
                 <form onSubmit={handleSignup}>
                     <CardContent className="space-y-4">

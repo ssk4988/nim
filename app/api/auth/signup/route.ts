@@ -13,7 +13,7 @@ interface RequestBody {
     token: string;
 };
 
-function isValidRequestBody(body: any): body is RequestBody {
+function isValidRequestBody(body: unknown): body is RequestBody {
     return (
         typeof body === "object" &&
         body !== null &&

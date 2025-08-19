@@ -1,7 +1,5 @@
 'use client';
-import { Button } from "@/components/ui/button";
 import { MarblesState } from "@/games/marbles";
-import { useSession } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
 import { GameMenu } from "../game-menu";
 import { GameSidebar } from "../game-sidebar";
@@ -10,7 +8,6 @@ import MarblesRenderer from "./marbles-renderer";
 import { computerThinkingTime, DEBUG } from "@/lib/constants";
 
 export default function MarblesPlayer() {
-    const { data: session } = useSession();
     // Initialize game state
     const [board, setBoard] = useState<MarblesState>(MarblesState.gen());
     const [pickedSide, setPickedSide] = useState<boolean>(false);

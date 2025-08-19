@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import NextAuth, { NextAuthOptions, TokenInfo, User } from "next-auth";
+import { NextAuthOptions, TokenInfo, User } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import jwt from "jsonwebtoken";
@@ -19,7 +19,7 @@ export const localAuthOptions: NextAuthOptions = {
                 email: { label: "Email", type: "text" },
                 token: { label: "Token", type: "text" }
             },
-            authorize: async (Credentials, req) => {
+            authorize: async (Credentials) => {
                 if (DEBUG) console.log("Authorizing Credentials: ", Credentials);
                 const { email, token } = Credentials as { email: string, token: string };
                 // Verify the token
@@ -95,7 +95,7 @@ export const localAuthOptions: NextAuthOptions = {
                     }
                 }
                 if(!session.user.token) {
-                    let token_info: TokenInfo = { email: session.user.email, name: session.user.name, id: session.user.id, username: session.user.username };
+                    const token_info: TokenInfo = { email: session.user.email, name: session.user.name, id: session.user.id, username: session.user.username };
                     session.user.token = jwt.sign(
                         token_info,
                         process.env.JWT_SECRET!,
